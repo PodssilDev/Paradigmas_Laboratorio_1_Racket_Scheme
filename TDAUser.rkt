@@ -95,11 +95,24 @@
 
 ; OTRAS FUNCIONES
 
-; No se tienen otras funciones
+; Dominio: Dos usuarios de tipo user
+; Recorrido: Un booleano
+; Descripcion: Compara si dos usuarios tienen el mismo nombre de usuario
+; Tipo de recursion: No se utiliza recursion
+(define (usersIguales? usuario1 usuario2)
+  (if (and(isUser? usuario1)(isUser? usuario2))
+      (if (eq? (getUsernameUser usuario1)(getUsernameUser usuario2))
+          #t
+          #f)
+      null))
 
 ; Algunos ejemplos
 
-(define user1 (user (date 07 10 2021) "MrDoopliss" "Test01"))
+(define user1 (user (date 07 10 2021) "MrDooplis" "Test01"))
+(define user2 (user (date 07 10 2021) "MrDoopliss" "Test01"))
 (define verificar (isUser? user1))
 (define obtener_pass (getPasswordUser user1))
 (define cambiopass(setPasswordUser user1 "pikachu0709"))
+(define compararr (usersIguales? user1 user2))
+
+(provide (all-defined-out))

@@ -1,6 +1,7 @@
 #lang racket
 ; Se requiere el uso del TDA Fecha para elaborar la construccion del TDA ParadigmaDocs
 (require "TDAFecha.rkt")
+(require "TDAUser.rkt")
 
 ; TDA ParadigmaDocs
 ; REPRESENTACION
@@ -23,7 +24,7 @@
 ; Descripcion: Corresponde al constructor de paradigmadocs.
 ; Tipo de recursion: No se utiliza recursion
 (define (paradigmadocs name fecha encryptFn decryptFunction)
-  (list name fecha encryptFn decryptFunction)
+  (list name fecha encryptFn decryptFunction (list))
   )
 
 ; FUNCIONES DE PERTENENCIA
@@ -71,6 +72,7 @@
       null)
   )
 
+
 ; Dominio: Un documento de tipo paradigmadocs
 ; Recorrido: Un texto (String)
 ; Descripcion: Obtiene el texto guardado en la posicion de decryptFn
@@ -80,6 +82,16 @@
       (car (cdr (cdr (cdr docs))))
       null)
   )
+
+; Dominio: Un documento de tipo paradigmadocs
+; Recorrido: Una lista de usuarios que contiene una fecha, un username y un password(date x string x string)
+; Descripcion: Obtiene la lista de usernames guardada en Paradigmadocs
+; Tipo de recursion: No se utiliza recursion
+(define(getUsersPdocs docs)
+  (if (isParadigmadocs? docs)
+      (car(cdr(cdr(cdr (cdr docs)))))
+      null)
+ )
 
 ; MODIFICADORES
 
@@ -125,7 +137,7 @@
 
 ; EJEMPLOS
 
-(define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn)) 
+(define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn) )
 (define pertenencia1 (isParadigmadocs? emptyGDocs))
 (define nombre (getNombrePdocs emptyGDocs))
 (define fecha (getFechaPdocs emptyGDocs))
@@ -134,5 +146,7 @@
 (define fechacambio (setFechaPdocs emptyGDocs (date 'hi' 10 2021)))
 (define string(setEncryptPdocs emptyGDocs "Un nuevo mensaje para el dia"))
 (define string2(setDecryptPdocs emptyGDocs "Vamos que se puede"))
+
+(define getnamedocs (getUsersPdocs emptyGDocs))
 
 (provide (all-defined-out))
