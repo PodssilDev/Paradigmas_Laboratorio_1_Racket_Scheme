@@ -8,27 +8,22 @@
 ; FUNCION REGISTER
 ; Dominio: Un documento de tipo paradigmadocs, una fecha de tipo fecha, un username de tipo string y un password de tipo string
 ; (paradigmadogs X fecha X string X string)
-; Recorrido: Un documento de tipo paradigmadocs
+; Recorrido: Un documento de tipo paradigmadocs actualizado
 ; Descripcion: Funcion que registra un usuario en paradigmadocs. Si se intenta registrar un usuario ya registrado, no se registra y
 ; se devuelve a paradigmadocs sin modificaciones
-; Tipo de recursion:  Recursion Natural
+; Tipo de recursion:  Recursion Natural (Llamado a la funcion recursiva RevisarUsuarioPdocs)
+; Justificacion de recursion: Es necesario para verificar si un usuario ya esta registrado.
 (define(register paradigmadocs date username password)
-  (define usuaro (user date username password)) ; Mala practica?
-  (define (yaRegistrado? entrada usuario )
-    (if(eq? entrada null)
-       #f
-       (if(usersIguales?(car entrada)usuario)
-          #t
-          (yaRegistrado? (cdr entrada)usuario))
-       ))
-  (if(yaRegistrado? (getUsersPdocs paradigmadocs) usuaro)
-     paradigmadocs
-     (list (getNombrePdocs paradigmadocs) (getFechaPdocs paradigmadocs)(getEncryptPdocs paradigmadocs)(getDecryptPdocs paradigmadocs) (cons usuaro(getUsersPdocs paradigmadocs)))))
+  (if(revisarUsuarioPdocs (getUsersPdocs paradigmadocs)(user date username password)) ; Llamado a funcion recursiva de TDA Paradigmadocs
+     (setUserPdocs paradigmadocs (user date username password ))
+     paradigmadocs))
 
 ; FUNCION LOGIN
 
 
 ; Ejemplos para la FUNCION REGISTER
-(define ejemplo (register emptyGDocs (date 25 3 2020) "user" "pass"))
+(define gDocs0(register emptyGDocs (date 25 3 2020) "user" "pass")) ; Ejemplo base
 (define gDocs1
-(register (register (register emptyGDocs (date 25 10 2021) "user1"  "pass2" ) (date 25 10 2021) "user1"  "pass2" ) (date 25 10 2021) "user3" "pass3"))
+(register (register (register emptyGDocs (date 25 10 2021) "user2" "pass1") (date 25 10 2021) "user2" "pass2") (date 25 10 2021) "user3" "pass3")) ;Un usuario ya esta registrado
+(define gDocs2 (register emptyGDocs (date 25 10 2021) 1233434 2222)) ; Ejemplo erroneo
+(define gDocs3(register(register emptyGDocs (date 09 10 2021) "user0" "pass0")(date 09 10 2021) "user1" "pass1")) ; Registro de dos usuarios diferentes

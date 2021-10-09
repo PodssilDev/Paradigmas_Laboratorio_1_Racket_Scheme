@@ -131,9 +131,31 @@
       (paradigmadocs (getNombrePdocs docs) (getFechaPdocs docs) (getEncryptPdocs docs) newDecrypt)
       docs))
 
+; Dominio: Un documento de tipo paradigmadocs y un usuario de tipo user
+; Recorrido: Una lista (de tipo paradigmadocs)
+; Descripcion: Se agrega un usuario registrado correctamente a paradigmadocs. Si se intenta registrar incorrectamente, se retorna Paradigmadocs
+; sin modificaciones
+; Tipo de recursion: No se utiliza recursion
+(define(setUserPdocs docs user1)
+  (if(and(isParadigmadocs? docs)(isUser? user1))
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(cons user1(getUsersPdocs docs)))
+     docs))
+
 ; OTRAS FUNCIONES
 
-; No se tienen mas funciones extras.
+; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
+; Recorrido: Booleano
+; Descripcion: Verifica si un usuario ya esta registrado, revisando toda la lista de usuarios
+; Tipo de recursion: Recursion Natural
+; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y comprobar que el user a registrar no este registrado.
+(define(revisarUsuarioPdocs listUser nameuser)
+  (if (null? listUser)
+      #t
+      (if(not(usersIguales?(car listUser) nameuser))
+         (revisarUsuarioPdocs(cdr listUser) nameuser)
+         #f)
+      )
+  )
 
 ; EJEMPLOS
 

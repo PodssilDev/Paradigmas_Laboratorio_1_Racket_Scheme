@@ -108,11 +108,8 @@
 
 ; Algunos ejemplos
 
-(define user1 (user (date 07 10 2021) "MrDooplis" "Test01"))
 (define user2 (user (date 07 10 2021) "MrDoopliss" "Test01"))
-(define verificar (isUser? user1))
-(define obtener_pass (getPasswordUser user1))
-(define cambiopass(setPasswordUser user1 "pikachu0709"))
-(define compararr (usersIguales? user1 user2))
+(define obtener_pass (getPasswordUser user2))
+(define cambiopass(setPasswordUser user2 "pikachu0709"))
 
 (provide (all-defined-out))
