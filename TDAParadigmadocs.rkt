@@ -20,12 +20,11 @@
 
 ; Se crea el constructor de paradigmadocs
 ; Dominio: Strings para el caso de name, encryptFn y decryptFn y Enteros para el caso de date
-; Recorrido: Una lista que contiene a name, date, el texto de encryptFn y el texto de decryptFn
+; Recorrido: Una lista que contiene a name, date, el texto de encryptFn y el texto de decryptFn, una lista de usuarios registrados y una lista de usuarios act
 ; Descripcion: Corresponde al constructor de paradigmadocs.
 ; Tipo de recursion: No se utiliza recursion
 (define (paradigmadocs name fecha encryptFn decryptFunction)
-  (list name fecha encryptFn decryptFunction (list))
-  )
+  (list name fecha encryptFn decryptFunction (list) (list)))
 
 ; FUNCIONES DE PERTENENCIA
 
@@ -93,6 +92,11 @@
       null)
  )
 
+(define(getUsersactivosPdocs docs)
+  (if (isParadigmadocs? docs)
+      (car(cdr(cdr(cdr (cdr (cdr docs))))))
+      null)
+ )
 ; MODIFICADORES
 
 ; Dominio: Un documento de tipo paradigmadocs y un string
@@ -138,9 +142,13 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(setUserPdocs docs user1)
   (if(and(isParadigmadocs? docs)(isUser? user1))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(cons user1(getUsersPdocs docs)))
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(cons user1(getUsersPdocs docs))(getUsersactivosPdocs docs))
      docs))
 
+(define(setUseractivosPdocs docs usern passw)
+  (if (and(and(isParadigmadocs? docs)(string? usern))(string? passw))
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(cons usern(cons passw (getUsersactivosPdocs docs))))
+     docs))
 ; OTRAS FUNCIONES
 
 ; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
@@ -156,10 +164,18 @@
          #f)
       )
   )
+(define(revisarUserActivoPdocs listUseract nameuseract passwact)
+  (if (null? listUseract)
+      #f
+      (if(verificarUsersUser(car listUseract) nameuseract passwact)
+         #t
+         (revisarUserActivoPdocs(cdr listUseract) nameuseract passwact)
+      )
+  ))
 
 ; EJEMPLOS
 
-(define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn) )
+(define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn)  )
 (define pertenencia1 (isParadigmadocs? emptyGDocs))
 (define nombre (getNombrePdocs emptyGDocs))
 (define fecha (getFechaPdocs emptyGDocs))
@@ -169,6 +185,6 @@
 (define string(setEncryptPdocs emptyGDocs "Un nuevo mensaje para el dia"))
 (define string2(setDecryptPdocs emptyGDocs "Vamos que se puede"))
 
-(define getnamedocs (getUsersPdocs emptyGDocs))
+(define getnamedocs (getUsersactivosPdocs emptyGDocs))
 
 (provide (all-defined-out))

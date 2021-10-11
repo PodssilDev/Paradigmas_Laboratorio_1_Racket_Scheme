@@ -20,6 +20,11 @@
 
 ; FUNCION LOGIN
 
+(define(login paradigmadocs username password)
+  (if(revisarUserActivoPdocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
+     (setUseractivosPdocs paradigmadocs username password)
+     paradigmadocs))
+
 
 ; Ejemplos para la FUNCION REGISTER
 (define gDocs0(register emptyGDocs (date 25 3 2020) "user" "pass")) ; Ejemplo base
@@ -27,3 +32,5 @@
 (register (register (register emptyGDocs (date 25 10 2021) "user2" "pass1") (date 25 10 2021) "user2" "pass2") (date 25 10 2021) "user3" "pass3")) ;Un usuario ya esta registrado
 (define gDocs2 (register emptyGDocs (date 25 10 2021) 1233434 2222)) ; Ejemplo erroneo
 (define gDocs3(register(register emptyGDocs (date 09 10 2021) "user0" "pass0")(date 09 10 2021) "user1" "pass1")) ; Registro de dos usuarios diferentes
+
+(define gDocs4 (login(login gDocs3  "user0" "pass0")"user1" "pass1"))
