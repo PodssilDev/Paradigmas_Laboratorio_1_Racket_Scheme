@@ -1,15 +1,20 @@
 #lang racket
-; TDA fecha
+; NOTA: ESTE TDA YA ESTABA CREADO Y FUE DESCARGADO DE UVIRTUAL. SOLO SE HICIERON ALGUNAS PEQUEÑAS MODIFICACIONES
 
-; REPRESENTACION
+;-----------------------------------TDA FECHA-----------------------------------------------------------------
+
+;----------------------------------REPRESENTACION-------------------------------------------------------------
+
 ; Este TDA representa una fecha con dia, mes y año. Se guarda en una lista con el mismo orden
 ; (entero X entero X entero)
 ; (list dia mes año) 
 
-; CONSTRUCTOR
+;-----------------------------------CONSTRUCTORES-------------------------------------------------------------
+
 ; Dominio: entero X entero X entero
 ; Descripción: Permite crear una fecha
 ; Recorrido: lista
+; Tipo de recursion: No se utiliza recursion
 (define (date d m a)
   (if (and (integer? d) (integer? m) (integer? a)
            (> d 0) (> m 0) (< m 13) (not (= a 0))
@@ -19,22 +24,26 @@
   )
 )
 
-;PERTENENCIA
-;descripción: Función que permite determinar si un elemento cualquiera es del tipo fecha
+;-----------------------------------FUNCIONES DE PERTENENCIA-----------------------------------------------------------------
+
+; Dominio: Elemento de cualquier tipo
+; Recorrido: Un Booleano
+; Descripción: Función que permite determinar si un elemento cualquiera es del tipo fecha
 ;             se implementa a partir del constructor
 ;             evaluando el retorno
-;dom: elemento de cualquier tipo
-;rec: boolean
+; Tipo de recursion: No se utiliza recursion
 (define (date? f)
   (and (list? f) 
        (= (length f) 3)
        (not (null? (date (car f) (cadr f) (caddr f)))))
 )
 
-;SELECTORES
-;descripción: Función que retorna el día en una fecha
-;dom: fecha
-;rec: entero
+;-----------------------------------SELECTORES-------------------------------------------------------------------------------
+
+; Dominio: fecha
+; Recorrido: entero
+; Descripción: Función que retorna el día en una fecha
+; Tipo de recursion: No se utiliza recursion
 (define (getDia f)
    (if (date? f)
        (car f)
@@ -42,9 +51,10 @@
    )
  )
 
-;descripción: Función que retorna el mes en una fecha
-;dom: fecha
-;rec: entero
+; Dominio: fecha
+; Recorrido: entero
+; Descripción: Función que retorna el mes en una fecha
+; Tipo de recursion: No se utiliza recursion
 (define (getMes f)
  (if (date? f)
        (cadr f)
@@ -52,9 +62,10 @@
    )  
 )
 
-;descripción: Función que retorna el año en una fecha
-;dom: fecha
-;rec: entero
+; Dominio: fecha
+; Recorrido: entero
+; Descripción: Función que retorna el año en una fecha
+; Tipo de recursion: No se utiliza recursion
 (define (getAgno f)
  (if (date? f)
        (caddr f)
@@ -62,10 +73,12 @@
    )
  )
 
-;Modificadores
-;descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al día
-;dom: fecha x entero
-;rec: fecha
+;-----------------------------------MODIFICADORES-------------------------------------------------------------------------------
+
+; Dominio: fecha x entero
+; Recorrido: fecha
+; Descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al día
+; Tipo de recursion: No se utiliza recursion
 (define (setDia f nd)
   (if (date? f)
       (date nd (getMes f) (getAgno f))
@@ -73,9 +86,10 @@
    )
  )
 
-;descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al mes
-;dom: fecha x entero
-;rec: fecha
+; Dominio: fecha x entero
+; Recorrido: fecha
+; Descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al mes
+; Tipo de recursion: No se utiliza recursion
 (define (setMes f nm)
   (if (date? f)
       (date (getDia f) nm (getAgno f))
@@ -83,9 +97,10 @@
    )
  )
 
-;descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al año
-;dom: fecha x entero
-;rec: fecha
+; Dominio: fecha x entero
+; Recorrido: fecha
+; Descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al año
+; Tipo de recursion: No se utiliza recursion
 (define (setAgno f na)
   (if (date? f)
       (date (getDia f) (getMes f) na)
@@ -93,7 +108,8 @@
    )
  )
 
-;OTRAS FUNCIONES
+ ;-----------------------------------OTRAS FUNCIONES-------------------------------------------------------------------------------
+
 ;descripción: función que transforma una fecha en string
 ;dom: fecha
 ;rec: string
@@ -170,4 +186,5 @@
        )
   )
 
+; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

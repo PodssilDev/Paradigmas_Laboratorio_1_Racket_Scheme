@@ -2,15 +2,15 @@
 ; Se requiere el uso del TDA Fecha para elaborar la construcción del TDA User
 (require "TDAFecha.rkt")
 
-; TDA User
+;-----------------------------------TDA USER-----------------------------------------------------------------
 
-; REPRESENTACION
+;-----------------------------------REPRESENTACION-----------------------------------------------------------
 
 ; Este TDA representa a un usuario del documento, que contiene una lista donde se guarda la fecha de registro
 ; el nombre del usuario y su contraseña en ese mismo orden.
 ; (fecha X string X string)
 
-; CONSTRUCTOR
+;-----------------------------------CONSTRUCTORES------------------------------------------------------------
 
 ; Dominio: Una fecha de tipo de dato fecha y strings para username y password (fecha x string x string)
 ; Recorrido: Una lista con la fecha, username y password del usuario
@@ -20,7 +20,7 @@
   (list date username password)
   )
 
-; FUNCIONES DE PERTENENCIA
+;-----------------------------------FUNCIONES DE PERTENENCIA-------------------------------------------------
 
 ; Dominio: Recibe un usuario de tipo de dato user
 ; Recorrido: Un booleano
@@ -32,7 +32,7 @@
      #f)
   )
 
-; SELECTORES
+;-----------------------------------SELECTORES---------------------------------------------------------------
 
 ; Dominio: Funcion que recibe un usuario de tipo de dato user
 ; Recorrido: Una fecha (lista)
@@ -64,7 +64,7 @@
      null)
   )
 
-; MODIFICADORES
+;-----------------------------------MODIFICADORES-------------------------------------------------------------
 
 ; Dominio: Recibe un usuario de tipo user y una fecha de tipo fecha
 ; Recorrido: Un usuario de tipo user (lista)
@@ -93,7 +93,7 @@
       (user (getFechaUser usuario) (getUsernameUser usuario) newPassword)
       usuario))
 
-; OTRAS FUNCIONES
+;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------
 
 ; Dominio: Dos usuarios de tipo user
 ; Recorrido: Un booleano
@@ -106,7 +106,6 @@
           #f)
       null))
 
-
 ; Dominio: Dos usuarios de tipo user
 ; Recorrido: Un booleano
 ; Descripcion: Compara si dos usuarios tienen el mismo nombre de usuario y el mismo password
@@ -118,10 +117,24 @@
           #f)
       null))
 
-; Algunos ejemplos
+; Dominio: Un usuario de tipo user y un nombre de usuario de tipo string
+; Recorrido: Un booleano
+; Descripcion: Compara si un usuario tiene el mismo nombre de usuario del string a comparar
+; Tipo de recursion: No se utiliza recursion
+(define (usernamesIguales? usuario1 usern2)
+  (if (and(isUser? usuario1)(string? usern2))
+      (if (eq? (getUsernameUser usuario1)usern2)
+          #t
+          #f)
+      null))
+
+;-----------------------------------EJEMPLOS DE PRUEBA--------------------------------------------------------------
+
 (define user000 (user(date 07 10 2021) "MrDoopliss" "Test01"))
 (define user2 (user (date 07 10 2021) "MrDoopliss" "Test01"))
 (define obtener_pass (getPasswordUser user2))
 (define cambiopass(setPasswordUser user2 "pikachu0709"))
-(define compare (verificarUsersUser user000 "MrDoopliss" "Test01"))
+(define compareusersnames (verificarUsersUser user000 "MrDoopliss" "Test01"))
+
+; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

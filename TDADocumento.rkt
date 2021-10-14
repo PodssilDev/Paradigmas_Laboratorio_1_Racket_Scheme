@@ -2,36 +2,40 @@
 ; Se necesita del TDA Fecha para la construccion del TDA Documento
 (require "TDAFecha.rkt")
 
-; TDA Documento
-; REPRESENTACION
-; Este TDA corresponde a un Documento, donde se guarda el autor del documento, la fecha de creacion del documento, el nombre del documento y
-; el contenido del documento, todo en una lista con el mismo orden (string X fecha X string X string)
+;-----------------------------------TDA DOCUMENTO---------------------------------------------------------------
 
-; CONSTRUCTORES
+;-----------------------------------REPRESENTACION--------------------------------------------------------------
 
-; Dominio: Un nombre de tipo string, una fecha de tipo fecha, un nombre de tipo string y un texto de tipo string
+; Este TDA corresponde a un Documento, donde se guarda el autor del documento, la fecha de creacion del documento, el nombre del documento,
+; el contenido del documento, una lista de permisos (de escritura, lectura o comentarios), un historial de versiones del contenido y
+; un ID unico de documento, donde el primero siempre parte con ID 0 y asi succesivamente. Todo en una lista con el mismo orden
+; (string X fecha X string X string X list X list X integer)
+
+;-----------------------------------CONSTRUCTORES---------------------------------------------------------------
+
+; Dominio: Un nombre de tipo string, una fecha de tipo fecha, un nombre de tipo string, un texto de tipo string y un ID de tipo integer
 ; Recorrido: Un documento de tipo documento (lista)
 ; Descripcion: Crea a un documento
 ; Tipo de recursion: No se utiliza recursion
-(define(documento autor fecha nombre_documento contenido_documento)
-(list autor fecha nombre_documento contenido_documento (list)(list)))
+(define(documento autor fecha nombre_documento contenido_documento ID)
+(list autor fecha nombre_documento contenido_documento (list)(list) ID))
 
-; FUNCIONES DE PERTENENCIA
+;-----------------------------------FUNCIONES DE PERTENENCIA----------------------------------------------------
 
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un booleano
-; Descripcion: Verifica si el formato del documento es correcto (si el nombre, autor y contenido son strings y la fecha es de tipo fecha)
+; Descripcion: Verifica si el formato del documento es correcto (si el nombre, autor y contenido son strings y la fecha es de tipo fecha y si el ID es un integer)
 ; Tipo de recursion: No se utiliza recursion
 (define(isDocumento? document)
-  (if (and(and(and(string? (car document))(date? (car(cdr document))))(string? (car(cdr(cdr document)))))(string? (car(cdr(cdr(cdr document))))))
+  (if (and(and(and(and(string? (car document))(date? (car(cdr document))))(string? (car(cdr(cdr document)))))(string? (car(cdr(cdr(cdr document))))))(integer? (car (cdr (cdr (cdr (cdr (cdr (cdr document)))))))))
       #t
       #f))
 
-; SELECTORES
+;-----------------------------------SELECTORES-----------------------------------------------------------------
 
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un autor de tipo string
-; Descripcion: Funcion que obtiene un autor de un documento
+; Descripcion: Funcion que obtiene el autor de un documento
 ; Tipo de recursion: No se utiliza recursion
 (define (getAutorDocumento document)
   (if (isDocumento? document)
@@ -40,7 +44,7 @@
 
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Una fecha de tipo fecha
-; Descripcion: Funcion que obtiene una fecha de creacion de un documento
+; Descripcion: Funcion que obtiene la fecha de creacion de un documento
 ; Tipo de recursion: No se utiliza recursion
 (define (getFechaDocumento document)
   (if (isDocumento? document)
@@ -83,7 +87,16 @@
       (car (cdr (cdr (cdr (cdr (cdr document))))))
       null))
 
-; MODIFICADORES
+; Dominio: Un documento de tipo documento
+; Recorrido: Un ID de documento de tipo integer
+; Descripcion: Funcion que el ID unico de un documento
+; Tipo de recursion: No se utiliza recursion
+(define (getIDDocumento document)
+  (if (isDocumento? document)
+      (car (cdr (cdr (cdr (cdr (cdr (cdr document)))))))
+      null))
+
+;-----------------------------------MODIFICADORES----------------------------------------------------------------
 
 ; Dominio: Un documento de tipo documento y un nuevo autor de tipo string
 ; Recorrido: Un documento de tipo documento (list)
@@ -91,7 +104,7 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(setAutorDocumento document newAutor)
   (if (and(isDocumento? document)(string? newAutor))
-      (list newAutor (getFechaDocumento document)(getNombreDocumento document)(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document))
+      (list newAutor (getFechaDocumento document)(getNombreDocumento document)(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
       document))
 
 ; Dominio: Un documento de tipo documento y una nueva fecha de tipo fecha (list)
@@ -101,16 +114,17 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(setFechaDocumento document newFecha)
   (if (and(and(isDocumento? document)(list? newFecha))(not(empty? newFecha)))
-      (list (getAutorDocumento document) newFecha (getNombreDocumento document)(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document))
+      (list (getAutorDocumento document) newFecha (getNombreDocumento document)(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
       document))
 
 ; Dominio: Un documento de tipo documento y un nuevo nombre de tipo string
 ; Recorrido: Un documento de tipo documento (list)
-; Descripcion: Funcion que modifica el documento y cambia el nombre del documento. Si el formato del nombre es incorrecto, retorna el documento sin modificaciones
+; Descripcion: Funcion que modifica el documento y cambia el nombre del documento. Si el formato del nombre es incorrecto, retorna el
+; documento sin modificaciones
 ; Tipo de recursion: No se utiliza recursion
 (define(setNombreDocumento document newNombre)
   (if (and(isDocumento? document)(string? newNombre))
-      (list (getAutorDocumento document) (getFechaDocumento document)newNombre(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document))
+      (list (getAutorDocumento document) (getFechaDocumento document)newNombre(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
       document))
 
 ; Dominio: Un documento de tipo documento y un nuevo contenido (texto) de tipo string
@@ -120,14 +134,37 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(setContenidoDocumento document newContenido)
   (if (and(isDocumento? document)(string? newContenido))
-      (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)newContenido(getPermisosDocumento document)(cons(getContenidoDocumento document)(getHistorialDocumento document)))
+      (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)newContenido(getPermisosDocumento document)(cons(getContenidoDocumento document)(getHistorialDocumento document))(getIDDocumento document))
       document))
 
-; EJEMPLOS
+; Dominio: Un documento de tipo documento y una lista que contiene sublistas de permisos (cada sublista tiene un username y el permiso)
+; Recorrido: Un documento de tipo documento (list)
+; Descripcion: Funcion que modifica el documento y agregar permisos a este. Si el formato de la lista de permisos es incorrecto,
+; retorna el documento sin modificaciones
+; Tipo de recursion: No se utiliza recursion
+(define (setPermisosDocumento document listpermisos)
+  (if (and(isDocumento? document)(list? listpermisos))
+      (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)(getContenidoDocumento document)(append listpermisos (getPermisosDocumento document))(getHistorialDocumento document)(getIDDocumento document))
+      document))
+;-----------------------------------OTRAS FUNCIONES---------------------------------------------------------------
 
-(define gDocs0001 ( documento "John" (date 12 10 2021) "Mi primer documento" "Este es el contenido del documento para el laboratorio de Paradigmas de Programación"))
-(define esdocu (setContenidoDocumento gDocs0001 "Mi nuevo documento"))
-(define esdocu2 (setContenidoDocumento esdocu "Otro contenido mas"))
-(define elemen (first(getHistorialDocumento esdocu2)))
+; Dominio: Un documento de tipo documento y un ID de tipo integer
+; Recorrido: Un booleano (o null en el caso de que document no corresponda a un documento valido)
+; Descripcion: Funcion que verifica si un documento tiene un ID en especifico.
+; Recursion: No se utiliza recursion
+(define (verificarIDs document ID1)
+  (if (and(isDocumento? document)(integer? ID1))
+      (if(eq? (getIDDocumento document) ID1)
+         #t
+         #f)
+      null))
 
+;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
+;Crear un documento
+(define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Este es el contenido del documento para el laboratorio de Paradigmas de Programación" 0))
+; Verificar si un documento es correcto
+(define esDocu? (isDocumento? Doc0001))
+
+
+; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))
