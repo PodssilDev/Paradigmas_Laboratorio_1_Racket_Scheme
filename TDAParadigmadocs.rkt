@@ -188,6 +188,15 @@
      (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons document(getDocumentosPdocs docs)))
      docs))
 
+; Dominio: Una plataforma de tipo paradigmadocs
+; Recorrido: Una plataforma de tipo paradigmadocs actualizada
+; Descripcion: Desloguea a un user activo 
+; Tipo de recursion: No se utiliza recursion
+(define (setRemoverActivoPdocs docs)
+  (if(isParadigmadocs? docs)
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(getDocumentosPdocs docs))
+     docs))
+
 ; Dominio: Una plataforma de tipo paradigmadocs, un documento de tipo documento, un ID de tipo integer y una lista de permisos de tipo list
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Desloguea a un user activo y agrega permisos a un documento de paradigmadocs. Si el formato del documento, del ID o de la lista de permisos

@@ -54,8 +54,10 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(create paradigmadocs date nombre contenido)
   (if (null? (getUsersactivosPdocs paradigmadocs))
-       paradigmadocs
-      (setDocumentoPdocs paradigmadocs (documento (car (getUsersactivosPdocs paradigmadocs)) date nombre contenido (definirID paradigmadocs)))))
+      paradigmadocs
+      (if (and(and(date? date)(string? nombre))(string? contenido))
+          (setDocumentoPdocs paradigmadocs (documento (car (getUsersactivosPdocs paradigmadocs)) date nombre (encryptFn contenido) (definirID paradigmadocs)))
+          (setRemoverActivoPdocs paradigmadocs))))
 
 ;-----------------------------------FUNCION SHARE------------------------------------------------------------------------
 

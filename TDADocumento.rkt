@@ -18,7 +18,7 @@
 ; Descripcion: Crea a un documento
 ; Tipo de recursion: No se utiliza recursion
 (define(documento autor fecha nombre_documento contenido_documento ID)
-(list autor fecha nombre_documento contenido_documento (list)(list) ID))
+(list autor fecha nombre_documento contenido_documento (list)(list (list contenido_documento 0)) ID))
 
 ;-----------------------------------FUNCIONES DE PERTENENCIA----------------------------------------------------
 
