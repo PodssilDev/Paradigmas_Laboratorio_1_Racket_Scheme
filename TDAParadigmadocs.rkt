@@ -181,11 +181,13 @@
 ; Dominio: Una plataforma de tipo paradigmadocs y un documento de tipo documento
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Desloguea a un user activo y agrega un documento a paradigmadocs. Si el formato del documento es incorrecto, se retorna a paradigmadocs
-; sin modificaciones
+; sin modificaciones. También verifica si un documento con el mismo ID ya habia sido agregado (para el caso de texto actualizado)
 ; Tipo de recursion: No se utiliza recursion
 (define (setDocumentoPdocs docs document)
   (if(and (and(isParadigmadocs? docs)(isDocumento? document))(not (eq? (getUsersactivosPdocs docs) null)))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons document(getDocumentosPdocs docs)))
+     (if(eq? null (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)))
+        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons document(getDocumentosPdocs docs)))
+        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons document(remove (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)) (getDocumentosPdocs docs)))))
      docs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs
@@ -205,7 +207,7 @@
 ; Justificacion de recursion: Sirve para encontrar al documento correcto de acuerdo a su ID
 (define (setDocumentoPermisosPdocs docs document ID listpermisos)
   (if(and(and(isParadigmadocs? docs)(isDocumento? document))(integer? ID))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs docs)ID)(getDocumentosPdocs docs))))
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs)) (cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs docs)ID)(getDocumentosPdocs docs))))
      docs))
 
 ;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------

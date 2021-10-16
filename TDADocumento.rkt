@@ -148,8 +148,9 @@
 ; Tipo de recursion: No se utiliza recursion
 (define (setPermisosDocumento document listpermisos)
   (if (and(isDocumento? document)(list? listpermisos))
-      (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)(getContenidoDocumento document)(append listpermisos (getPermisosDocumento document))(getHistorialDocumento document)(getIDDocumento document))
+      (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)(getContenidoDocumento document)(filtrarPermisosUnicos null (append listpermisos (getPermisosDocumento document)))(getHistorialDocumento document)(getIDDocumento document))
       document))
+
 ;-----------------------------------OTRAS FUNCIONES---------------------------------------------------------------
 
 ; Dominio: Un documento de tipo documento y un ID de tipo integer
@@ -181,13 +182,62 @@
       #t
       #f)
   )
+
+; Dominio: Una lista (inicialmente vacia) y un username de tipo string
+; Recorrido: Un booleano
+; Descripcion: Funcion que retorna True si el user no esta en la lista final de permisos
+; Recursion: Recursion Natural
+; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user ya ha sido agregado anteriormente con otro permiso
+(define (noEstaPermiso listfinal userpermiso)
+  (if (eq? listfinal null)
+      #t
+      (if (eq? (first (car listfinal))userpermiso)
+          #f
+          (noEstaPermiso (cdr listfinal) userpermiso))))
+
+; Dominio: Una lista  (inicialmente vacia) y una lista de permisos
+; Recorrido: Una lista de permisos filtrada
+; Descripcion: Funcion que filtra la lista de permisos para que un User no aparezca mas de una vez en la lista de permisos
+; Tipo de recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista de permisos y filtrarla correctamente
+(define (filtrarPermisosUnicos listfinal listpermisos)
+ (if (eq? listpermisos null)
+     listfinal
+     (if (noEstaPermiso listfinal (first(car listpermisos)))
+         (filtrarPermisosUnicos (cons (car listpermisos) listfinal) (cdr listpermisos))
+         (filtrarPermisosUnicos listfinal (cdr listpermisos)))))
+
+
+; Dominio: Una lista de permisos y un username de tipo string
+; Recorrido: null o una lista que contiene al user y un permiso
+; Descripcion: Funcion que busca si un user tiene un permiso y retorna la sublista con su permiso
+; Recursion: Recursion Natural
+; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user tiene un permiso o no.
+(define (TienePermiso? listpermisos userpermiso)
+  (if (eq? listpermisos null)
+      null
+      (if (eq? (first (car listpermisos))userpermiso)
+          (car listpermisos)
+          (TienePermiso? (cdr listpermisos) userpermiso))))
+
+; Dominio: Una lista de permiso, que contiene un username y un permiso
+; Recorrido: Un booleano
+; Descripcion: Funcion que retorna True si el user en especifico tiene el permiso de escritura
+; Recursion: No se utiliza recursion
+(define (puedeEscribir listperm)
+  (if (eq? listperm null)
+      #f
+      (if(eq? (second listperm) #\w)
+         #t
+         #f)))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))
 ; Verificar si un documento es correcto
 (define esDocu? (isDocumento? Doc0001))
 
-(define newcontent (setContenidoDocumento Doc0001 "Este es un texto" (date 14 10 2021)#t))
+;(define newcontent (setContenidoDocumento Doc0001 "Este es un texto" (date 14 10 2021)#t))
 
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

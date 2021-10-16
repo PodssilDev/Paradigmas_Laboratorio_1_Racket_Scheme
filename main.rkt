@@ -35,11 +35,13 @@
      (cond
        [(eq? operation create) (lambda(date nombre contenido)(operation (setUseractivosPdocs paradigmadocs username) date nombre contenido))]
        [(eq? operation share) (lambda(idDoc access . accesses)(operation (setUseractivosPdocs paradigmadocs username) idDoc access accesses))]
+       [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation (setUseractivosPdocs paradigmadocs username) idDoc date contenidoTexto))]
        [else (paradigmadocs)]
        )
      (cond
        [(eq? operation create) (lambda(date nombre contenido)(operation paradigmadocs date nombre contenido))]
        [(eq? operation share) (lambda(idDoc access . accesses)(operation paradigmadocs idDoc access accesses))]
+       [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation paradigmadocs idDoc date contenidoTexto))]
        [else (paradigmadocs)]
        )
      )
@@ -63,12 +65,12 @@
 
 ; Dominio: Una plataforma de tipo paradigmadocs, un ID de documento de tipo integer y una lista de accesos (funcion access)
 ; Recorrido: Una plataforma de tipo paradigmadocs, actualizada en el caso de que se pueda dar permisos correctamente
-; Descripcion: Funcion que permite dar permisos de escritura, lectura o comentarios de un documento a uno o mas usuarios que ya estan
-; registrados y guarda los permisos dentro de paradigmadocs. Solo el propietario de un documento puede dar permisos. Si se intenta
-; dar permisos sin estar logueado o si el user que esta intentando dar permisos no es el autor del documento, se retorna a paradigmadocs
-; sin modificaciones
-; Tipo de recursion: Recursion Natural (Funcion encontrarIDs)
-; Justificacion de Recursion: Permite encontrar al documento correcto a traves de su ID
+; Descripcion: Funcion que permite dar permisos de escritura, lectura o comentarios para un documento a un usuario que esta registrado. Solo se pueden dar los
+; permisos anteriormente mencionados, el autor de un documento no puede darse permisos a si mismo (ya que ya tiene permisos) y los permisos de los usuarios son
+; actualizables (pueden cambiar y no puede aparecer el user mas de una vez con permisos distintos en la lista de permisos del documento). Si se intenta dar
+; permisos a un usuario que no esta registrado, retorna a Paradigmadocs sin modificaciones.
+; Tipo de recursion: Recursion Natural (Funcion encontrarIDs, Funcion filtrarPermisosUnicos)
+; Justificacion de Recursion: Permite encontrar al documento correcto a traves de su ID y también filtrar la lista de permisos para que no hayan usuarios repetidos
 (define(share paradigmadocs idDoc access . accesses)
   (if (null? (getUsersactivosPdocs paradigmadocs))
       paradigmadocs
@@ -80,10 +82,28 @@
 
 ;-----------------------------------FUNCION ADD---------------------------------------------------------------------------
 
-;(define (add paradigmadocs idDoc date contenidoTexto)
-;  (if (or(null? (getUsersactivosPdocs paradigmadocs))(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-;      paradigmadocs
-;      (if(or(eq? (car(getUseractivosPdocs paradigmadocs))(getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))(eq? ))
+; Dominio: Una plataforma de tipo paradigmadocs, un ID de documento de tipo integer, una fecha de tipo fecha y un texto de tipo string
+; Recorrido: Una plataforma de tipo paradigmadocs, actualizada en el caso de que se pudo agregar texto a un documento correctamente
+; Descripcion: Funcion que agrega texto a un documento. El texto se agrega al final y se encrypta mediante la funcion EncryptFn. El texto
+; anterior se queda solo en el historial y el nuevo texto pasa a ser el "texto activo". En el caso de que no se haya logueado correctamente,
+; se intente agregar texto a un documento que no existe o donde no se tiene el permiso de escritura, se retorna a paradigmadocs sin modificaciones.
+; Tipo de recursion: Recursion Natural (Funcion encontrarIDs, Funcion TienePermiso?)
+; Justificacion de Recursion: Permite encontrar el documento correcto a traves de su ID y tambien permite verificar la lista de permisos para ver si
+; el usuario logueado puede escribir en el documento obtenido a traves del ID.
+(define (add paradigmadocs idDoc date contenidoTexto)
+  (if (null? (getUsersactivosPdocs paradigmadocs))
+      paradigmadocs
+      (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? contenidoTexto)))
+         (setRemoverActivoPdocs paradigmadocs)
+         (if(eq? (first(getUsersactivosPdocs paradigmadocs)) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
+            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (car(getUsersactivosPdocs paradigmadocs)) ) ) #t)
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
+               (setRemoverActivoPdocs paradigmadocs))))))
+
+;-----------------------------------FUNCION RESTOREVERSION----------------------------------------------------------------
+
+
 
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
@@ -111,7 +131,7 @@
 (define gDocs2 ((login gDocs1 "user1" "pass1" create) (date 30 08 2021) "doc0" "contenido doc0"))
 
 ; Ejemplo erroneo: Se intenta crear un documento pero el login es incorrecto
-(define gDocs2000 ((login gDocs1 "user1" "pass2" create) (date 30 08 2021) "doc1" "contenido doc1"))
+(define gDocs2000 ((login gDocs2 "user1" "pass2" create) (date 30 08 2021) "doc1" "contenido doc1"))
 
 ; Ejemplo erroneo: Se intenta crear otro documento pero se intenta loguear a un usuario que no esta registrado
 (define gDocs3 ((login gDocs2 "user5" "pass5" create) (date 30 08 2021) "doc2" "contenido doc2"))
@@ -124,6 +144,7 @@
 
 ; Se loguea al user1 correctamente y user1 crea un tercer documento
 (define gDocs4000 ((login gDocs4 "user1" "pass1" create) (date 30 08 2021) "doc2" "contenido doc2"))
+
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y SHARE-----------------------------------------------------
 
 ; User 1 se loguea correctamente y le da acceso de lectura al user 2 para el documento 0
@@ -136,13 +157,33 @@
 (define gDocs7 ((login gDocs6 "user3" "pass3" share) 0 (access "user3" #\c)))
 
 ; Ejemplo erroneo: User 1 se loguea correctamente, pero intenta dar permisos a un User que no esta registrado, aunque se le dan
-; permisos correctamente a User 3
+; permisos correctamente a User 3, luego intenta darse permisos a si mismo e intenta dar un permiso que no existe a user 3
 (define gDocs7000 ((login gDocs6 "user1" "pass1" share) 2 (access "user4" #\r)(access "user1" #\c) (access "user3" #\w) (access "user3" #\b)))
 
 ; Ejemplo erroneo: Se intenta usar share sin loguear y se intenta dar acceso a un documento que no existe
 (define gDocs7001 (share gDocs7000 3 (access "user2" #\c)))
 
 ; Ejemplo erroneo: User 1 se loguea correctamente pero intenta dar permisos a un documento que no existe
-(define gDocs7002 ((login gDocs7000 "user1" "pass1" share) 3 (access "user3" #\r)(access "user3" #\w)))
+(define gDocs7002 ((login gDocs7000 "user1" "pass1" share) 3 (access "user3" #\w)(access "user3" #\c) (access "user3" #\r)))
+
+; User 1 se loguea correctamente y le cambia los permisos a User 3. Este se queda con el ultimo (lectura en este caso)
+(define gDocs7003 ((login gDocs7000 "user1" "pass1" share) 2 (access "user3" #\w)(access "user3" #\c) (access "user3" #\r)))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y ADD--------------------------------------------------------
+
+; User 1 se loguea correctamente y agrega contenido a su propio documento. 
+(define gDocs8 ((login gDocs7003 "user1" "pass1"  add) 0 (date 30 11 2021) "mas0"))
+
+; User 3 se loguea correctamente y agrega contenido a un documento donde tiene permisos de escritura
+(define gDocs9 ((login gDocs8 "user3" "pass3" add) 2 (date 30 11 2021) "mas2"))
+
+; User 1 se loguea correctamente pero intenta escribir en un documento que no existe
+(define gDocs8000 ((login gDocs7003 "user1" "pass1" add) 3  (date 16 10 2021) "Paradigmas"))
+
+; User 3 se loguea correctamente pero intenta escribir en un documento donde no tiene permisos
+(define gDocs9000 ((login gDocs8 "user3" "pass3" add) 1 (date 16 10 2021) "Texto"))
+
+; User 1 se loguea pero intenta agregar texto de formato incorrecto a uno de sus documentos
+(define gDocs10 ((login gDocs9 "user1" "pass3" add) 0 (date 16 10 2021) 123313))
+
+;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y RESTOREVERSION----------------------------------------
