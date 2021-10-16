@@ -231,6 +231,27 @@
          #t
          #f)))
 
+; Dominio: Una lista de historial de versiones (Contiene sublistas con una fecha, texto y un ID de version) y un ID de version de tipo integer
+; Recorrido: Un texto de tipo string
+; Descripcion: Funcion que permite obtener al texto correcto que se quiere restaurar. Si el texto no se logra encontrar, se retorna null
+; Recursion: Recursion Natural
+; Justificacion de Recursion: Permite recorrer toda la lista del historial de versiones
+(define(obtenerVersion listHistorial idHist)
+  (if(eq? listHistorial null)
+     null
+     (if (eq? idHist (third(car listHistorial)))
+         (second(car listHistorial))
+         (obtenerVersion (cdr listHistorial) idHist))))
+
+; Dominio: Un documento de tipo document y un ID de tipo integer
+; Recorrido: Un documento (lista)
+; Descripcion: Funcion que permite colocar el texto desde el historial como texto activo
+; Recursion: No se utiliza recursion
+(define (restaurarVer document id)
+  (if (eq? null (obtenerVersion (getHistorialDocumento document) id))
+      document
+      (list (getAutorDocumento document)(getFechaDocumento document)(getNombreDocumento document) (obtenerVersion (getHistorialDocumento document) id) (getPermisosDocumento document) (getHistorialDocumento document)(getIDDocumento document))))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))

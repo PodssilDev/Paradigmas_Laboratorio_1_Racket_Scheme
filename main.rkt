@@ -36,12 +36,14 @@
        [(eq? operation create) (lambda(date nombre contenido)(operation (setUseractivosPdocs paradigmadocs username) date nombre contenido))]
        [(eq? operation share) (lambda(idDoc access . accesses)(operation (setUseractivosPdocs paradigmadocs username) idDoc access accesses))]
        [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation (setUseractivosPdocs paradigmadocs username) idDoc date contenidoTexto))]
+       [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation(setUseractivosPdocs paradigmadocs username)idDoc idVersion))]
        [else (paradigmadocs)]
        )
      (cond
        [(eq? operation create) (lambda(date nombre contenido)(operation paradigmadocs date nombre contenido))]
        [(eq? operation share) (lambda(idDoc access . accesses)(operation paradigmadocs idDoc access accesses))]
        [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation paradigmadocs idDoc date contenidoTexto))]
+       [eq? operation restoreVersion (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
        [else (paradigmadocs)]
        )
      )
@@ -103,7 +105,22 @@
 
 ;-----------------------------------FUNCION RESTOREVERSION----------------------------------------------------------------
 
+; Dominio: Una plataforma de tipo paradigmadocs, un ID de documento de tipo integer y un ID de version de texto de tipo integer
+; Recorrido: Una plataforma de tipo paradigmadocs, actualizada si es que se logró restaurar una version de un documento exitosamente
+; Descripcion: Restaura la version de un documento desde el historial. Si el user intenta restaurar un documento que no es de su propiedad,
+; o si intenta restaurar una versión que no existe o restaurar de un documento que no existe, se retorna a Paradigmadocs sin modificaciones
+; Tipo de recursion: Recursion Natural (Funcion encontrarIDs y restaurarVer)
+; Justificacion de Recursion: Permite encontrar al documento correcto de acuerdo a su ID y a la version correcta del texto desde el historial
+(define (restoreVersion paradigmadocs idDoc idVersion)
+  (if(null? (getUsersactivosPdocs paradigmadocs))
+     paradigmadocs
+     (if(or(or(null? (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))(not(integer? idDoc)))(not(integer? idVersion)))
+        (setRemoverActivoPdocs paradigmadocs)
+        (if (eq? (first(getUsersactivosPdocs paradigmadocs)) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+            (setDocumentoPdocs paradigmadocs (restaurarVer (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)idVersion))
+            (setRemoverActivoPdocs paradigmadocs)))))
 
+;-----------------------------------FUNCION REVOKEALLACCESSES----------------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
@@ -187,3 +204,18 @@
 (define gDocs10 ((login gDocs9 "user1" "pass3" add) 0 (date 16 10 2021) 123313))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y RESTOREVERSION----------------------------------------
+
+; User 2 intenta restaurar una version de un documento que no es de su propiedad
+(define gDocs11 ((login gDocs9 "user2" "pass2" restoreVersion) 0 0))
+
+; User 1 intenta restaurar una version de un documento que no existe
+(define gDocs1100 ((login gDocs9 "user1" "pass1" restoreVersion) 5 0))
+
+; User 1 intenta restaurar una version que no existe uno de sus documentos
+(define gDocs1101 ((login gDocs9 "user1" "pass1" restoreVersion) 0 5))
+
+; User 1 intenta restaurar incorrectamente una version de un documento
+(define gDocs1102 ((login gDocs9 "user1" "pass1" restoreVersion) "0" "0"))
+
+; User 1 logra restaurar la version inicial del documento 0
+(define gDocs1103 ((login gDocs9 "user1" "pass1" restoreVersion) 0 0))
