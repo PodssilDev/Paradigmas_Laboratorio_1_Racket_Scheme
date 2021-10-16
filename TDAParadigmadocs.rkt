@@ -266,31 +266,32 @@
           (car listdocs)
           (encontrarIDs (cdr listdocs) ID1))))
 
-; Dominio: Una lista de usuarios registrados y un nombre de tipo string
+; Dominio: Una lista de usuarios registrados, un nombre de tipo string y un autor de tipo string
 ; Recorrido: Un booleano
-; Descripcion: Verifica si un nombre de usuario ya esta registrado correctamente
+; Descripcion: Verifica si un nombre de usuario ya esta registrado correctamente o si este coincide al nombre del autor de un documento
 ; Tipo de recursion: Recursion Natural
 ; Justificacion de Recursion: Permite recorrer toda la lista de usuarios registrados
-(define(revisarUsernPdocs listUser nameuser)
+(define(revisarUsernPdocs listUser nameuser autor)
   (if (null? listUser)
       #t
-      (if(not(usernamesIguales?(car listUser) nameuser))
-         (revisarUsernPdocs(cdr listUser) nameuser)
-         #f)
+      (if(not(usernamesIguales?(car listUser) nameuser autor))
+         #f
+         (revisarUsernPdocs(cdr listUser) nameuser autor)
       )
-  )
+  ))
 
 ; Dominio: Una lista de usuarios, una lista vacia y una lista de permisos
 ; Recorrido: Una lista de permisos actualizada
 ; Descripcion: Funcion que filtra la lista de permisos para dejar los permisos de solo aquellos usuarios que estan registrados en paradigmadocs
+; y aquellos permisos que sean validos (Son validos los permisos de lectura, escritura y comentarios)
 ; Tipo de recursion: Recursion Natural (Funcion revisarUsernPdocs)
-; Justificacion de recursion: Permite recorrer toda la lista de usuarios registrados
-(define (filtrarPermisosPdocs listUser listfinal listpermisos)
+; Justificacion de recursion: Permite recorrer toda la lista de usuarios registrados y verificar los permisos correctos
+(define (filtrarPermisosPdocs listUser listfinal listpermisos autor)
   (if (null? listpermisos)
       listfinal
-      (if (revisarUsernPdocs listUser (first(car listpermisos)))
-          (filtrarPermisosPdocs listUser listfinal (cdr listpermisos))
-          (filtrarPermisosPdocs listUser (cons (car listpermisos) listfinal) (cdr listpermisos)))))
+      (if (or(revisarUsernPdocs listUser (first(car listpermisos)) autor)(not(verificarPermiso (second(car listpermisos)))))
+          (filtrarPermisosPdocs listUser listfinal (cdr listpermisos) autor)
+          (filtrarPermisosPdocs listUser (cons (car listpermisos) listfinal) (cdr listpermisos) autor))))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
 

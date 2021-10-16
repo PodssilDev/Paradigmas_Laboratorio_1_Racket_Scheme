@@ -70,13 +70,20 @@
 ; Tipo de recursion: Recursion Natural (Funcion encontrarIDs)
 ; Justificacion de Recursion: Permite encontrar al documento correcto a traves de su ID
 (define(share paradigmadocs idDoc access . accesses)
-  (if (or(null? (getUsersactivosPdocs paradigmadocs))(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+  (if (null? (getUsersactivosPdocs paradigmadocs))
       paradigmadocs
-      (if(eq? (car(getUsersactivosPdocs paradigmadocs))(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)))
-         (setDocumentoPermisosPdocs paradigmadocs (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc) idDoc (filtrarPermisosPdocs (getUsersPdocs paradigmadocs) null (cons  access (car accesses))))
-         paradigmadocs)))
+      (if(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc))
+          (setRemoverActivoPdocs paradigmadocs)
+          (if(eq? (car(getUsersactivosPdocs paradigmadocs))(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)))
+             (setDocumentoPermisosPdocs paradigmadocs (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc) idDoc (filtrarPermisosPdocs (getUsersPdocs paradigmadocs) null (cons  access (car accesses))(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc))))
+             (setRemoverActivoPdocs paradigmadocs)))))
 
 ;-----------------------------------FUNCION ADD---------------------------------------------------------------------------
+
+;(define (add paradigmadocs idDoc date contenidoTexto)
+;  (if (or(null? (getUsersactivosPdocs paradigmadocs))(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+;      paradigmadocs
+;      (if(or(eq? (car(getUseractivosPdocs paradigmadocs))(getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))(eq? ))
 
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
@@ -130,12 +137,12 @@
 
 ; Ejemplo erroneo: User 1 se loguea correctamente, pero intenta dar permisos a un User que no esta registrado, aunque se le dan
 ; permisos correctamente a User 3
-(define gDocs7000 ((login gDocs6 "user1" "pass1" share) 2 (access "user4" #\r)(access "user3" #\c)))
+(define gDocs7000 ((login gDocs6 "user1" "pass1" share) 2 (access "user4" #\r)(access "user1" #\c) (access "user3" #\w) (access "user3" #\b)))
 
 ; Ejemplo erroneo: Se intenta usar share sin loguear y se intenta dar acceso a un documento que no existe
 (define gDocs7001 (share gDocs7000 3 (access "user2" #\c)))
 
 ; Ejemplo erroneo: User 1 se loguea correctamente pero intenta dar permisos a un documento que no existe
-(define gDocs7002 ((login gDocs7000 "user1" "pass1" share) 3 (access "user2" #\r)(access "user3" #\c)))
+(define gDocs7002 ((login gDocs7000 "user1" "pass1" share) 3 (access "user3" #\r)(access "user3" #\w)))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y ADD--------------------------------------------------------

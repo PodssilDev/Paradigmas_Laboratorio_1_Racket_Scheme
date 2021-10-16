@@ -18,7 +18,7 @@
 ; Descripcion: Crea a un documento
 ; Tipo de recursion: No se utiliza recursion
 (define(documento autor fecha nombre_documento contenido_documento ID)
-(list autor fecha nombre_documento contenido_documento (list)(list (list contenido_documento 0)) ID))
+(list autor fecha nombre_documento contenido_documento (list)(list (list fecha contenido_documento 0)) ID))
 
 ;-----------------------------------FUNCIONES DE PERTENENCIA----------------------------------------------------
 
@@ -127,14 +127,18 @@
       (list (getAutorDocumento document) (getFechaDocumento document)newNombre(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
       document))
 
-; Dominio: Un documento de tipo documento y un nuevo contenido (texto) de tipo string
+; Dominio: Un documento de tipo documento, un nuevo contenido (texto) de tipo string, una nueva fecha de tipo fecha
+; y un valor booleano
 ; Recorrido: Un documento de tipo documento (list)
 ; Descripcion: Funcion que modifica el documento y cambia el contenido (texto) del documento. Si el formato del texto es incorrecto,
-; retorna el documento sin modificaciones
+; retorna el documento sin modificaciones. Dependiendo de flag, si este es True, se concatena el texto nuevo por el texto actual. Si
+; flag es False, se reemplaza el texto.
 ; Tipo de recursion: No se utiliza recursion
-(define(setContenidoDocumento document newContenido)
-  (if (and(isDocumento? document)(string? newContenido))
-      (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)newContenido(getPermisosDocumento document)(cons(getContenidoDocumento document)(getHistorialDocumento document))(getIDDocumento document))
+(define(setContenidoDocumento document newContenido fecha  flag)
+  (if (and(and(and(isDocumento? document)(string? newContenido))(date? fecha))(boolean? flag))
+      (if (eq? flag #t)
+       (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)(string-join (list newContenido (getContenidoDocumento document)))(getPermisosDocumento document)(cons(list fecha (string-join (list newContenido (getContenidoDocumento document))) (obtenerIDHistorial document))(getHistorialDocumento document))(getIDDocumento document))
+       (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)newContenido(getPermisosDocumento document)(cons(list fecha newContenido (obtenerIDHistorial document))(getHistorialDocumento document))(getIDDocumento document)))
       document))
 
 ; Dominio: Un documento de tipo documento y una lista que contiene sublistas de permisos (cada sublista tiene un username y el permiso)
@@ -159,12 +163,31 @@
          #f)
       null))
 
+; Dominio: Un documento de tipo dcumento
+; Recorrido: Un ID de tipo integer
+; Descripcion: Obtiene el ID de un texto para el historial de versiones
+; Recursion: No se utiliza recursion
+(define (obtenerIDHistorial document)
+  (if (isDocumento? document)
+      (length (getHistorialDocumento document))
+      null))
+
+; Dominio: Un permiso de tipo caracter
+; Recorrido: Un booleano
+; Descripcion: Retorna True si el permiso es valido (Un permiso valido puede ser lectura, comentarios o escritura)
+; Tipo de recursion: No se utiliza recursion
+(define (verificarPermiso permiso)
+  (if (or(or(eq? permiso #\w)(eq? permiso #\r))(eq? permiso #\c))
+      #t
+      #f)
+  )
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
-(define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Este es el contenido del documento para el laboratorio de Paradigmas de Programación" 0))
+(define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))
 ; Verificar si un documento es correcto
 (define esDocu? (isDocumento? Doc0001))
 
+(define newcontent (setContenidoDocumento Doc0001 "Este es un texto" (date 14 10 2021)#t))
 
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

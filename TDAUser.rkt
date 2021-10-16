@@ -121,9 +121,9 @@
 ; Recorrido: Un booleano
 ; Descripcion: Compara si un usuario tiene el mismo nombre de usuario del string a comparar
 ; Tipo de recursion: No se utiliza recursion
-(define (usernamesIguales? usuario1 usern2)
-  (if (and(isUser? usuario1)(string? usern2))
-      (if (eq? (getUsernameUser usuario1)usern2)
+(define (usernamesIguales? usuario1 usern2 autor)
+  (if (and(and(isUser? usuario1)(string? usern2))(string? autor))
+      (if (or(not(eq? (getUsernameUser usuario1)usern2))(eq? usern2 autor))
           #t
           #f)
       null))
