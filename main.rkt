@@ -38,6 +38,7 @@
        [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation (setUseractivosPdocs paradigmadocs username) idDoc date contenidoTexto))]
        [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation(setUseractivosPdocs paradigmadocs username)idDoc idVersion))]
        [(eq? operation revokeAllAccesses)  (operation(setUseractivosPdocs paradigmadocs username))]
+       [(eq? operation search) (lambda(searchText)(operation(setUseractivosPdocs paradigmadocs username) searchText))]
        [else (paradigmadocs)]
        )
      (cond
@@ -46,6 +47,7 @@
        [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation paradigmadocs idDoc date contenidoTexto))]
        [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
        [(eq? operation revokeAllAccesses) (operation paradigmadocs)]
+       [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
        [else (paradigmadocs)]
        )
      )
@@ -139,6 +141,22 @@
 
 ;-----------------------------------FUNCION SEARCH-----------------------------------------------------------------------
 
+; Dominio: Una plataforma de tipo paradigmadocs y un texto de tipo string
+; Recorrido: Una lista de documentos
+; Descripcion: Funcion que encuentra todos los documentos que contienen al texto de entrada, lo busca tanto en el historial como en la version activa
+; y retorna una lista que contiene a todos los documentos que cumplen ese criterio. Solo el dueño del documento y aquellos usuarios con permiso de escritura
+; o lectura pueden realizar una busqueda dentro de ese documento. Si no se encuentra ningun documento o el user intenta buscar incorrectamente, se retorna null
+; Tipo de recursion: Recursion Natural (obtenerDocumentosUser, obtenerDocumentosAutor, encontrarTexto)
+; Justificacion de recursion: Permite encontrar a todos los documentos correctos (de acuerdo al user logueado) y a recorrer todo el historial
+(define(search paradigmadocs searchText)
+  (if(or(null? (getUsersactivosPdocs paradigmadocs))(not(string? searchText)))
+     null
+     (if(null? (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))))
+        null
+        (map eliminarRastro(filter encontrarTexto (addTextoSearch null (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))) (encryptFn searchText)))))))
+
+;-----------------------------------FUNCION PARADIGMADOCS->STRING---------------------------------------------------------
+
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION REGISTER-----------------------------------------------------
@@ -177,7 +195,7 @@
 (define gDocs4 ((login gDocs2 "user2" "pass2" create) (date 30 08 2021) "doc1" "contenido doc1"))
 
 ; Se loguea al user1 correctamente y user1 crea un tercer documento
-(define gDocs4000 ((login gDocs4 "user1" "pass1" create) (date 30 08 2021) "doc2" "contenido doc2"))
+(define gDocs4000 ((login gDocs4 "user1" "pass1" create) (date 30 08 2021) "doc2" "contenidx doc2"))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y SHARE-----------------------------------------------------
 
@@ -206,10 +224,10 @@
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y ADD--------------------------------------------------------
 
 ; User 1 se loguea correctamente y agrega contenido a su propio documento. 
-(define gDocs8 ((login gDocs7003 "user1" "pass1"  add) 0 (date 30 11 2021) "mas0"))
+(define gDocs8 ((login gDocs7003 "user1" "pass1"  add) 0 (date 30 11 2021) "perro"))
 
 ; User 3 se loguea correctamente y agrega contenido a un documento donde tiene permisos de escritura
-(define gDocs9 ((login gDocs8 "user3" "pass3" add) 2 (date 30 11 2021) "mas2"))
+(define gDocs9 ((login gDocs8 "user3" "pass3" add) 1 (date 30 11 2021)"doc" ))
 
 ; User 1 se loguea correctamente pero intenta escribir en un documento que no existe
 (define gDocs8000 ((login gDocs7003 "user1" "pass1" add) 3  (date 16 10 2021) "Paradigmas"))
@@ -243,3 +261,7 @@
 (define gDocs12 (login gDocs9 "user1" "pass1" revokeAllAccesses))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y SEARCH----------------------------------------
+
+(define gDocs13 ((login gDocs9 "user2" "pass2" search) "o"))
+
+;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y PARADIGMADOCS->STRING-------------------------

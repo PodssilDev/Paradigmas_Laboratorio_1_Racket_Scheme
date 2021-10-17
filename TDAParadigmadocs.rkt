@@ -330,6 +330,30 @@
          (obtenerDocumentosAutor (cons (car listdocument)listfinal) (cdr listdocument) user)
          (obtenerDocumentosAutor listfinal (cdr listdocument) user))))
 
+; Dominio: Una lista (inicialmente vacia), una lista de documento y un user de tipo string
+; Recorrido: Una lista con documentos, donde se tienen documentos cuyo autor no es el user
+; Descripcion: Funcion que obtiene los documentos que no son de un autor en especifico
+; Tipo de recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista de documentos de paradigmadocs
+(define (obtenerDocumentosUser listfinal listdocument user)
+  (if (null? listdocument)
+      listfinal
+      (if(eq? (getAutorDocumento (car listdocument)) user)
+         (obtenerDocumentosUser listfinal (cdr listdocument) user)
+         (obtenerDocumentosUser (cons (car listdocument)listfinal) (cdr listdocument) user))))
+
+; Dominio: Una lista (inicialmente vacia), una lista de documento y un user de tipo string
+; Recorrido: Una lista con documentos, donde se tienen los documentos donde el user tiene permisos
+; Descripcion: Funcion que obtiene los documentos donde el user no es el autor, pero tiene permiso de escritura o lectura
+; Tipo de recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista de documentos de paradigmadocs
+(define (filtrarPorPermisos listfinal listdocument user)
+  (if (eq? listdocument null)
+      listfinal
+      (if (puedeEscribirLeer (TienePermiso? (getPermisosDocumento (car listdocument)) user))
+          (filtrarPorPermisos (cons (car listdocument) listfinal) (cdr listdocument) user)
+          (filtrarPorPermisos listfinal (cdr listdocument) user))))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
 
 (define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn) )

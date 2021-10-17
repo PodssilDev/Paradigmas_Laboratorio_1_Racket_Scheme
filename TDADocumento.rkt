@@ -156,7 +156,7 @@
 ; Dominio: Un documento de tipo documento y un ID de tipo integer
 ; Recorrido: Un booleano (o null en el caso de que document no corresponda a un documento valido)
 ; Descripcion: Funcion que verifica si un documento tiene un ID en especifico.
-; Recursion: No se utiliza recursion
+; Tipo de Recursion: No se utiliza recursion
 (define (verificarIDs document ID1)
   (if (and(isDocumento? document)(integer? ID1))
       (if(eq? (getIDDocumento document) ID1)
@@ -167,7 +167,7 @@
 ; Dominio: Un documento de tipo dcumento
 ; Recorrido: Un ID de tipo integer
 ; Descripcion: Obtiene el ID de un texto para el historial de versiones
-; Recursion: No se utiliza recursion
+; Tipo de Recursion: No se utiliza recursion
 (define (obtenerIDHistorial document)
   (if (isDocumento? document)
       (length (getHistorialDocumento document))
@@ -186,7 +186,7 @@
 ; Dominio: Una lista (inicialmente vacia) y un username de tipo string
 ; Recorrido: Un booleano
 ; Descripcion: Funcion que retorna True si el user no esta en la lista final de permisos
-; Recursion: Recursion Natural
+; Tipo de Recursion: Recursion Natural
 ; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user ya ha sido agregado anteriormente con otro permiso
 (define (noEstaPermiso listfinal userpermiso)
   (if (eq? listfinal null)
@@ -211,7 +211,7 @@
 ; Dominio: Una lista de permisos y un username de tipo string
 ; Recorrido: null o una lista que contiene al user y un permiso
 ; Descripcion: Funcion que busca si un user tiene un permiso y retorna la sublista con su permiso
-; Recursion: Recursion Natural
+; Tipo de Recursion: Recursion Natural
 ; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user tiene un permiso o no.
 (define (TienePermiso? listpermisos userpermiso)
   (if (eq? listpermisos null)
@@ -223,7 +223,7 @@
 ; Dominio: Una lista de permiso, que contiene un username y un permiso
 ; Recorrido: Un booleano
 ; Descripcion: Funcion que retorna True si el user en especifico tiene el permiso de escritura
-; Recursion: No se utiliza recursion
+; Tipo de Recursion: No se utiliza recursion
 (define (puedeEscribir listperm)
   (if (eq? listperm null)
       #f
@@ -234,7 +234,7 @@
 ; Dominio: Una lista de historial de versiones (Contiene sublistas con una fecha, texto y un ID de version) y un ID de version de tipo integer
 ; Recorrido: Un texto de tipo string
 ; Descripcion: Funcion que permite obtener al texto correcto que se quiere restaurar. Si el texto no se logra encontrar, se retorna null
-; Recursion: Recursion Natural
+; Tipo de Recursion: Recursion Natural
 ; Justificacion de Recursion: Permite recorrer toda la lista del historial de versiones
 (define(obtenerVersion listHistorial idHist)
   (if(eq? listHistorial null)
@@ -246,7 +246,7 @@
 ; Dominio: Un documento de tipo document y un ID de tipo integer
 ; Recorrido: Un documento (lista)
 ; Descripcion: Funcion que permite colocar el texto desde el historial como texto activo
-; Recursion: No se utiliza recursion
+; Tipo de Recursion: No se utiliza recursion
 (define (restaurarVer document id)
   (if (eq? null (obtenerVersion (getHistorialDocumento document) id))
       document
@@ -255,9 +255,62 @@
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un documento de tipo documento (lista)
 ; Descripcion: Funcion que elimina los permisos de un documento
-; Recursion: No se utiliza recursion
+; Tipo de Recursion: No se utiliza recursion
 (define (eliminarPermisos document)
   (list (getAutorDocumento document) (getFechaDocumento document) (getNombreDocumento document)(getContenidoDocumento document) null (getHistorialDocumento document)(getIDDocumento document)))
+
+; Dominio: Una lista de permisos
+; Recorrido: Un booleano
+; Descripcion: Funcion que retorna True si una lista de un user en especifico tiene el permiso de escribir o leer el documento
+; Recursion: No se utiliza recursion 
+(define (puedeEscribirLeer listperm)
+  (if (eq? listperm null)
+      #f
+      (if(or(eq? (second listperm) #\w)(eq? (second listperm) #\r))
+         #t
+         #f)))
+
+; Dominio: Una lista (inicialmente vacia), una lissta de documentos y un texto de tipo string
+; Recorrido: Una lista final donde cada sublista contiene al texto como su elemento final
+; Descripcion: Funcion que agrega un texto a una parte final de una lista. Retorna una lista grande que contiene a todas las sublistas
+; Tipo de Recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista de listdocs para agregar el texto a cada sublista
+(define (addTextoSearch listfinal listdocs text)
+  (if (null? listdocs)
+      listfinal
+      (addTextoSearch (cons (append(car listdocs) (list text)) listfinal) (cdr listdocs) text)))
+
+; Dominio: Una lista de historial de un documento y un texto de tipo string
+; Recorrido: Un booleano
+; Descripcion: Funcion que recorre todo el historial de versiones de un documento para encontrar si un texto se encuentra en alguna version
+; Tipo de Recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista del historial para encontrar si existe una version que tenga un texto en especifico
+(define (encontrarTextoHistorial listhistorial texto )
+  (if(null? listhistorial)
+     #f
+     (if(not( eq? (length(string-split (second(car listhistorial)) texto)) (length(list (second(car listhistorial))))))
+        #t
+        (if (not(eq? (length(string->list(car(string-split(second(car listhistorial)) texto)))) (length(string->list(second(car listhistorial))))))
+            #t
+            (encontrarTextoHistorial (cdr listhistorial) texto)))))
+
+; Dominio: Un documento de tipo documento
+; Recorrido: Un booleano
+; Descripcion: Funcion que busca la presencia de un texto en especifico en su texto activo.
+; Tipo de Recursion:  No se utiliza recursion
+(define (encontrarTexto document)
+  (if(not( eq? (length(string-split (getContenidoDocumento document)(last document))) (length(list (getContenidoDocumento document)))))
+     #t
+     (if (not(eq? (length(string->list(car(string-split (getContenidoDocumento document)(last document)))))(length(string->list(getContenidoDocumento document)))))
+         #t
+         (encontrarTextoHistorial (getHistorialDocumento document)(last document)))))
+
+; Dominio: Un documento de tipo documento
+; Recorrido: Un documento actualizado
+; Descripcion: Funcion que elimina el "rastro" de la funcion search; elimina el texto a buscar que se encuentra en la ultima posicion del documento
+; Tipo de recursion: No se utiliza recursion
+(define (eliminarRastro documento)
+  (remove (last documento) documento))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
