@@ -252,6 +252,13 @@
       document
       (list (getAutorDocumento document)(getFechaDocumento document)(getNombreDocumento document) (obtenerVersion (getHistorialDocumento document) id) (getPermisosDocumento document) (getHistorialDocumento document)(getIDDocumento document))))
 
+; Dominio: Un documento de tipo documento
+; Recorrido: Un documento de tipo documento (lista)
+; Descripcion: Funcion que elimina los permisos de un documento
+; Recursion: No se utiliza recursion
+(define (eliminarPermisos document)
+  (list (getAutorDocumento document) (getFechaDocumento document) (getNombreDocumento document)(getContenidoDocumento document) null (getHistorialDocumento document)(getIDDocumento document)))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))
@@ -260,5 +267,6 @@
 
 ;(define newcontent (setContenidoDocumento Doc0001 "Este es un texto" (date 14 10 2021)#t))
 
+(define elimin (eliminarPermisos Doc0001))
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

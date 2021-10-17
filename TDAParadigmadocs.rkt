@@ -181,7 +181,7 @@
 ; Dominio: Una plataforma de tipo paradigmadocs y un documento de tipo documento
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Desloguea a un user activo y agrega un documento a paradigmadocs. Si el formato del documento es incorrecto, se retorna a paradigmadocs
-; sin modificaciones. También verifica si un documento con el mismo ID ya habia sido agregado (para el caso de texto actualizado)
+; sin modificaciones. También verifica si un documento con el mismo ID ya habia sido agregado (para el caso de querer agregarlo actualizado)
 ; Tipo de recursion: No se utiliza recursion
 (define (setDocumentoPdocs docs document)
   (if(and (and(isParadigmadocs? docs)(isDocumento? document))(not (eq? (getUsersactivosPdocs docs) null)))
@@ -209,6 +209,29 @@
   (if(and(and(isParadigmadocs? docs)(isDocumento? document))(integer? ID))
      (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs)) (cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs docs)ID)(getDocumentosPdocs docs))))
      docs))
+
+; Dominio: Una plataforma de tipo paradigmadocs y un documento de tipo documento
+; Recorrido: Una plataforma de tipo paradigmadocs actualizada
+; Descripcion: Funcion alternativa de setDocumento, solo que esta no quita al usuario de la seccion activa
+; Tipo de recursion: No se utiliza recursion
+(define (setDocumentoAlternPdocs docs document)
+  (if(and (and(isParadigmadocs? docs)(isDocumento? document))(not (eq? (getUsersactivosPdocs docs) null)))
+     (if(eq? null (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)))
+        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(getUsersactivosPdocs docs) (cons document(getDocumentosPdocs docs)))
+        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(getUsersactivosPdocs docs) (cons document(remove (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)) (getDocumentosPdocs docs)))))
+     docs))
+
+; Dominio: Una plataforma de tipo paradigmadocs y una lista de documentos de tipo list
+; Recorrido: Una plataforma de tipo paradigmadocs actualizada
+; Descripcion: Funcion que permite agregar toda la lista de documentos a paradigmadocs
+; Tipo de recursion: Recursion Natural
+; Justificacion de recursion: Permite que todos los documentos sean agregados
+(define (setListaDocumentosPdocs docs listdocumentos)
+  (if (eq? null listdocumentos)
+      docs
+      (if (eq? (length listdocumentos) 1)
+          (setListaDocumentosPdocs (setDocumentoPdocs docs (car listdocumentos)) (cdr listdocumentos))
+          (setListaDocumentosPdocs (setDocumentoAlternPdocs docs (car listdocumentos)) (cdr listdocumentos)))))
 
 ;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------
 
@@ -294,6 +317,18 @@
       (if (or(revisarUsernPdocs listUser (first(car listpermisos)) autor)(not(verificarPermiso (second(car listpermisos)))))
           (filtrarPermisosPdocs listUser listfinal (cdr listpermisos) autor)
           (filtrarPermisosPdocs listUser (cons (car listpermisos) listfinal) (cdr listpermisos) autor))))
+
+; Dominio: Una lista vacia, una lista de documentos de tipo list y un nombre de usuario de tipo string
+; Recorrido: Una lista con documentos, donde todos los documentos tienen al mismo autor
+; Descripcion: Funcion que obtiene a los documentos de un autor en especifico
+; Tipo de recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista de documentos de paradigmadocs
+(define (obtenerDocumentosAutor listfinal listdocument user)
+  (if (null? listdocument)
+      listfinal
+      (if(eq? (getAutorDocumento (car listdocument)) user)
+         (obtenerDocumentosAutor (cons (car listdocument)listfinal) (cdr listdocument) user)
+         (obtenerDocumentosAutor listfinal (cdr listdocument) user))))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
 

@@ -37,13 +37,15 @@
        [(eq? operation share) (lambda(idDoc access . accesses)(operation (setUseractivosPdocs paradigmadocs username) idDoc access accesses))]
        [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation (setUseractivosPdocs paradigmadocs username) idDoc date contenidoTexto))]
        [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation(setUseractivosPdocs paradigmadocs username)idDoc idVersion))]
+       [(eq? operation revokeAllAccesses)  (operation(setUseractivosPdocs paradigmadocs username))]
        [else (paradigmadocs)]
        )
      (cond
        [(eq? operation create) (lambda(date nombre contenido)(operation paradigmadocs date nombre contenido))]
        [(eq? operation share) (lambda(idDoc access . accesses)(operation paradigmadocs idDoc access accesses))]
        [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation paradigmadocs idDoc date contenidoTexto))]
-       [eq? operation restoreVersion (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
+       [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
+       [(eq? operation revokeAllAccesses) (operation paradigmadocs)]
        [else (paradigmadocs)]
        )
      )
@@ -121,6 +123,21 @@
             (setRemoverActivoPdocs paradigmadocs)))))
 
 ;-----------------------------------FUNCION REVOKEALLACCESSES----------------------------------------------------------------
+
+; Dominio: Una plataforma de tipo paradigmadocs
+; Recorrido: Una plataforma de tipo paradigmadocs, actualizada si es que se logra quitar permisos exitosamente
+; Descripcion: Funcion que elimina los permisos de todos los documentos de un usuario. Si el user no tiene documentos, retorna a
+; Paradigmadocs sin modificaciones
+; Tipo de recursion: Recursion Natural (setListaDocumentosPdocs)
+; Justificacion de recursion: Permite modificar a todos los documentos de un usuario en especifico
+(define (revokeAllAccesses paradigmadocs)
+  (if(null? (getUsersactivosPdocs paradigmadocs))
+     paradigmadocs
+     (if(eq? null (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))))
+        (setRemoverActivoPdocs paradigmadocs)
+        (setListaDocumentosPdocs paradigmadocs (map eliminarPermisos (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))) )))))
+
+;-----------------------------------FUNCION SEARCH-----------------------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
@@ -219,3 +236,10 @@
 
 ; User 1 logra restaurar la version inicial del documento 0
 (define gDocs1103 ((login gDocs9 "user1" "pass1" restoreVersion) 0 0))
+
+;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y REVOKEALLACCESSES-----------------------------
+
+;User 1 se loguea y retira el permiso de todos sus documentos
+(define gDocs12 (login gDocs9 "user1" "pass1" revokeAllAccesses))
+
+;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y SEARCH----------------------------------------
