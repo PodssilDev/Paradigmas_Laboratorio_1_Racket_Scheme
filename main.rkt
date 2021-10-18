@@ -39,6 +39,7 @@
        [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation(setUseractivosPdocs paradigmadocs username)idDoc idVersion))]
        [(eq? operation revokeAllAccesses)  (operation(setUseractivosPdocs paradigmadocs username))]
        [(eq? operation search) (lambda(searchText)(operation(setUseractivosPdocs paradigmadocs username) searchText))]
+       [(eq? operation paradigmadocs->string) (operation(setUseractivosPdocs paradigmadocs username))]
        [else (paradigmadocs)]
        )
      (cond
@@ -48,6 +49,7 @@
        [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
        [(eq? operation revokeAllAccesses) (operation paradigmadocs)]
        [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
+       [(eq? operation paradigmadocs->string) (operation paradigmadocs)]
        [else (paradigmadocs)]
        )
      )
@@ -157,6 +159,10 @@
 
 ;-----------------------------------FUNCION PARADIGMADOCS->STRING---------------------------------------------------------
 
+(define (paradigmadocs->string paradigmadocs)
+  (if (null? (getUsersactivosPdocs paradigmadocs))
+      #f
+      (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs)))"Los documentos propios del usuario o los cuales puede acceder son:\n" (string-join(map documentoToString (map desencryptarDocs (append (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))))))))))
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION REGISTER-----------------------------------------------------
@@ -262,6 +268,8 @@
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y SEARCH----------------------------------------
 
-(define gDocs13 ((login gDocs9 "user2" "pass2" search) "o"))
+(define gDocs13 ((login gDocs9 "user1" "pass1" search) "o"))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y PARADIGMADOCS->STRING-------------------------
+
+(define gDocs14 (login gDocs9 "user1" "pass1" paradigmadocs->string))

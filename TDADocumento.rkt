@@ -312,6 +312,21 @@
 (define (eliminarRastro documento)
   (remove (last documento) documento))
 
+
+(define (permisoToString listperm)
+  (if(eq? (second listperm) #\w)
+     (string-join (list (first listperm)"tiene permiso de escritura""\n "))
+     (if (eq? (second listperm) #\r)
+         (string-join (list (first listperm)"tiene permiso de lectura""\n "))
+         (string-join (list (first listperm)"tiene permiso de comentarios" "\n ")))))
+
+(define (historialToString listhistorial)
+  (string-join (list "Version N°"(number->string (third listhistorial))":" "*"(second listhistorial)"*" "version guardada el dia" (date->string (first listhistorial))"\n")))
+  
+(define (documentoToString document)
+  (if(null? (getPermisosDocumento document))
+     (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos: No se ha dado permisos a otros usuarios\n" "Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))
+     (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos:" "\n" (string-join(map permisoToString (getPermisosDocumento document)))"Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))))
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))

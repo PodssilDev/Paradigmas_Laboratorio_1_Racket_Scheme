@@ -354,6 +354,29 @@
           (filtrarPorPermisos (cons (car listdocument) listfinal) (cdr listdocument) user)
           (filtrarPorPermisos listfinal (cdr listdocument) user))))
 
+; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
+; Recorrido: Booleano
+; Descripcion: Verifica si un usuario ya esta registrado, revisando toda la lista de usuarios
+; Tipo de recursion: Recursion Natural
+; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y comprobar que el user a registrar no este registrado.
+(define(encontrarDatosUsuarioPdocs listUser nameuser)
+  (if(eq?(second(car listUser)) nameuser)
+     (string-join (list " Username:"(second(cons (date->string (first(car listUser))) (remove (last(remove(first(car listUser)) (car listUser))) (remove(first(car listUser)) (car listUser))))) "\n" "Fecha de registro:" (first(cons (date->string (first(car listUser))) (remove (last(remove(first(car listUser)) (car listUser))) (remove(first(car listUser)) (car listUser))))) "\n" ))
+     (encontrarDatosUsuarioPdocs(cdr listUser) nameuser)))
+
+(define (filtrarPorAccesos listfinal listdocument user)
+  (if (eq? listdocument null)
+      listfinal
+      (if (not(null?(TienePermiso? (getPermisosDocumento (car listdocument)) user)))
+          (filtrarPorPermisos (cons (car listdocument) listfinal) (cdr listdocument) user)
+          (filtrarPorPermisos listfinal (cdr listdocument) user))))
+
+(define (desencryptarHistorial listhist)
+  (list (first listhist) (decryptFn (second listhist)) (third listhist)))
+
+(define (desencryptarDocs listdoc)
+  (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFn(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc)))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
 
 (define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn) )
