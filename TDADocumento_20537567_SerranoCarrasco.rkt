@@ -1,6 +1,6 @@
 #lang racket
 ; Se necesita del TDA Fecha para la construccion del TDA Documento
-(require "TDAFecha.rkt")
+(require "TDAFecha_20537567_SerranoCarrasco.rkt")
 
 ;-----------------------------------TDA DOCUMENTO---------------------------------------------------------------
 
@@ -207,7 +207,6 @@
          (filtrarPermisosUnicos (cons (car listpermisos) listfinal) (cdr listpermisos))
          (filtrarPermisosUnicos listfinal (cdr listpermisos)))))
 
-
 ; Dominio: Una lista de permisos y un username de tipo string
 ; Recorrido: null o una lista que contiene al user y un permiso
 ; Descripcion: Funcion que busca si un user tiene un permiso y retorna la sublista con su permiso
@@ -312,7 +311,10 @@
 (define (eliminarRastro documento)
   (remove (last documento) documento))
 
-
+; Dominio: Una lista de permisos
+; Recorrido: Un string
+; Descripcion: Transforma una lista de permisos en un string
+; Tipo de recursion: No se utiliza recursion
 (define (permisoToString listperm)
   (if(eq? (second listperm) #\w)
      (string-join (list (first listperm)"tiene permiso de escritura""\n "))
@@ -320,13 +322,22 @@
          (string-join (list (first listperm)"tiene permiso de lectura""\n "))
          (string-join (list (first listperm)"tiene permiso de comentarios" "\n ")))))
 
+; Dominio: Una lista de historial
+; Recorrido: Un string
+; Descripcion: Transforma una lista de historial en un string
+; Tipo de recursion: No se utiliza recursion
 (define (historialToString listhistorial)
   (string-join (list "Version N°"(number->string (third listhistorial))":" "*"(second listhistorial)"*" "version guardada el dia" (date->string (first listhistorial))"\n")))
-  
+
+; Dominio: Un documento
+; Recorrido: Un string
+; Descripcion: Transforma todo un documento (es decir, autor, nombre, fecha de creacion, contenido, permisos, historial) en un string
+; Tipo de recursion: No se utiliza su recursion
 (define (documentoToString document)
   (if(null? (getPermisosDocumento document))
      (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos: No se ha dado permisos a otros usuarios\n" "Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))
      (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos:" "\n" (string-join(map permisoToString (getPermisosDocumento document)))"Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))

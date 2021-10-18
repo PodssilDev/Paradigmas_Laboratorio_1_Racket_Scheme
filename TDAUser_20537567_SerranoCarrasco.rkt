@@ -1,6 +1,6 @@
 #lang racket
 ; Se requiere el uso del TDA Fecha para elaborar la construcción del TDA User
-(require "TDAFecha.rkt")
+(require "TDAFecha_20537567_SerranoCarrasco.rkt")
 
 ;-----------------------------------TDA USER-----------------------------------------------------------------
 
@@ -112,7 +112,7 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(verificarUsersUser usuario1 usuarioname2 usuariopassw2)
   (if (and(and(isUser? usuario1)(string? usuarioname2))(string? usuariopassw2))
-      (if (and(eq? (getUsernameUser usuario1) usuarioname2)(eq?(getPasswordUser usuario1)usuariopassw2))
+      (if (and(eq? (getUsernameUser usuario1) usuarioname2)(equal?(getPasswordUser usuario1)usuariopassw2))
           #t
           #f)
       null))
@@ -127,6 +127,13 @@
           #t
           #f)
       null))
+
+; Dominio: Un usuario de tipo user
+; Recorrido: Un string
+; Descripcion: Funcion que transforma toda la informacion de un usuario (username, password y fecha de registro) en un string
+; Tipo de recursion: No se utiliza recursion
+(define (userToString usuario)
+  (string-join (list "---------\n"  "Username:" (getUsernameUser usuario)"\n" "Password:" (getPasswordUser usuario) "\n" "Fecha de registro:" (date->string(getFechaUser usuario))"\n")))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA--------------------------------------------------------------
 

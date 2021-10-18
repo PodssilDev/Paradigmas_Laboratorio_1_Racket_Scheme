@@ -1,10 +1,10 @@
 #lang racket
 ; Se requiere el uso del TDA Fecha, TDA Paradigmadocs, TDA User y TDA Documento para la construcción de las funciones a continuación
 
-(require "TDAFecha.rkt")
-(require "TDAParadigmadocs.rkt")
-(require "TDAUser.rkt")
-(require "TDADocumento.rkt")
+(require "TDAFecha_20537567_SerranoCarrasco.rkt")
+(require "TDAParadigmadocs_20537567_SerranoCarrasco.rkt")
+(require "TDAUser_20537567_SerranoCarrasco.rkt")
+(require "TDADocumento_20537567_SerranoCarrasco.rkt")
 
 ;-----------------------------------FUNCION REGISTER-----------------------------------------------------------------
 
@@ -16,9 +16,13 @@
 ; Tipo de recursion:  Recursion Natural (Llamado a la funcion recursiva revisarUsuarioPdocs)
 ; Justificacion de recursion: Es necesario para verificar si un usuario ya esta registrado.
 (define(register paradigmadocs date username password)
-  (if(revisarUsuarioPdocs (getUsersPdocs paradigmadocs)(user date username password)) ; Llamado a funcion recursiva de TDA Paradigmadocs
-     (setUserPdocs paradigmadocs (user date username password ))
-     paradigmadocs)
+  (if (or(or(or(not(isParadigmadocs? paradigmadocs))(not(date? date)))(not(string? username)))(not(string? password)))
+      paradigmadocs
+      (if(revisarUsuarioPdocs (getUsersPdocs paradigmadocs)(user date username (encryptFn password))) ; Llamado a funcion recursiva de TDA Paradigmadocs
+         (setUserPdocs paradigmadocs (user date username (encryptFn password)
+                       ))
+         paradigmadocs)
+      )
   )
 
 ;-----------------------------------FUNCION LOGIN---------------------------------------------------------------------
@@ -31,27 +35,30 @@
 ; Tipo de recursion: Recursion Natural (Llamado a la funcion recursiva revisarUserActivoPdocs)
 ; Justificacion de recursion: Es necesario para verificar si un usuario ya esta registrado y si el password coincide correctamente
 (define(login paradigmadocs username password operation)
-  (if(revisarUserActivoPdocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
-     (cond
-       [(eq? operation create) (lambda(date nombre contenido)(operation (setUseractivosPdocs paradigmadocs username) date nombre contenido))]
-       [(eq? operation share) (lambda(idDoc access . accesses)(operation (setUseractivosPdocs paradigmadocs username) idDoc access accesses))]
-       [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation (setUseractivosPdocs paradigmadocs username) idDoc date contenidoTexto))]
-       [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation(setUseractivosPdocs paradigmadocs username)idDoc idVersion))]
-       [(eq? operation revokeAllAccesses)  (operation(setUseractivosPdocs paradigmadocs username))]
-       [(eq? operation search) (lambda(searchText)(operation(setUseractivosPdocs paradigmadocs username) searchText))]
-       [(eq? operation paradigmadocs->string) (operation(setUseractivosPdocs paradigmadocs username))]
-       [else (paradigmadocs)]
-       )
-     (cond
-       [(eq? operation create) (lambda(date nombre contenido)(operation paradigmadocs date nombre contenido))]
-       [(eq? operation share) (lambda(idDoc access . accesses)(operation paradigmadocs idDoc access accesses))]
-       [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation paradigmadocs idDoc date contenidoTexto))]
-       [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
-       [(eq? operation revokeAllAccesses) (operation paradigmadocs)]
-       [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
-       [(eq? operation paradigmadocs->string) (operation paradigmadocs)]
-       [else (paradigmadocs)]
-       )
+  (if(or(not(string? username))(not(string? password)))
+     paradigmadocs
+     (if(revisarUserActivoPdocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
+        (cond
+          [(eq? operation create) (lambda(date nombre contenido)(operation (setUseractivosPdocs paradigmadocs username) date nombre contenido))]
+          [(eq? operation share) (lambda(idDoc access . accesses)(operation (setUseractivosPdocs paradigmadocs username) idDoc access accesses))]
+          [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation (setUseractivosPdocs paradigmadocs username) idDoc date contenidoTexto))]
+          [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation(setUseractivosPdocs paradigmadocs username)idDoc idVersion))]
+          [(eq? operation revokeAllAccesses)  (operation(setUseractivosPdocs paradigmadocs username))]
+          [(eq? operation search) (lambda(searchText)(operation(setUseractivosPdocs paradigmadocs username) searchText))]
+          [(eq? operation paradigmadocs->string) (operation(setUseractivosPdocs paradigmadocs username))]
+          [else (paradigmadocs)]
+          )
+        (cond
+          [(eq? operation create) (lambda(date nombre contenido)(operation paradigmadocs date nombre contenido))]
+          [(eq? operation share) (lambda(idDoc access . accesses)(operation paradigmadocs idDoc access accesses))]
+          [(eq? operation add) (lambda(idDoc date contenidoTexto)(operation paradigmadocs idDoc date contenidoTexto))]
+          [(eq? operation restoreVersion) (lambda(idDoc idVersion)(operation paradigmadocs idDoc idVersion))]
+          [(eq? operation revokeAllAccesses) (operation paradigmadocs)]
+          [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
+          [(eq? operation paradigmadocs->string) (operation paradigmadocs)]
+          [else (paradigmadocs)]
+          )
+        )
      )
   )
 
@@ -159,10 +166,23 @@
 
 ;-----------------------------------FUNCION PARADIGMADOCS->STRING---------------------------------------------------------
 
+; Dominio: Una plataforma de tipo paradigmadocs
+; Recorrido: Un string que contiene informacion
+; Descripcion: Funcion que retorna un string, pero este difiere dependiendo de si un Usuario se loguea correctamente o no. Para el primer caso,
+; retorna un string que contiene toda la informacion al usuario, es decir, su username, fecha de registro, sus documentos propios y a los que tiene acceso,
+; junto con toda la informacion de aquellos documentos. Para el segundo caso, retorna todo el contenido de Paradigmadocs, es decir, nombre de la plataforma,
+; fecha de creacion de plataforma, usuarios registrado (cada user tiene una fecha de registro propia, un username y un password encryptado) y todos los documentos
+; creados en la plataforma, los cuales contienen toda su informacion.
+; Tipo de recursion: No se utiliza recursion
 (define (paradigmadocs->string paradigmadocs)
   (if (null? (getUsersactivosPdocs paradigmadocs))
-      #f
-      (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs)))"Los documentos propios del usuario o los cuales puede acceder son:\n" (string-join(map documentoToString (map desencryptarDocs (append (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))))))))))
+      (string-join (list " Nombre de la plataforma:" (getNombrePdocs paradigmadocs)"\n" "Fecha de creacion:" (date->string (getFechaPdocs paradigmadocs))"\n" "Usuarios registrados en la plataforma:\n" (string-join(map userToString (getUsersPdocs paradigmadocs))) "\n" "Documentos creados en la plataforma:\n" (string-join(map documentoToString (map desencryptarDocs (getDocumentosPdocs paradigmadocs))))))
+      (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs)))"Los documentos propios del usuario o los cuales puede acceder son:\n" (string-join(map documentoToString (map desencryptarDocs (append (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))))))
+                         )
+                   )
+      )
+  )
+
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION REGISTER-----------------------------------------------------

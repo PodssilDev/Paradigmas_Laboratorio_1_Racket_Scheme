@@ -1,8 +1,8 @@
 #lang racket
 ; Se requiere el uso de los TDA Fecha, TDA User y TDA Documento para elaborar la construccion del TDA ParadigmaDocs
-(require "TDAFecha.rkt")
-(require "TDAUser.rkt")
-(require "TDADocumento.rkt")
+(require "TDAFecha_20537567_SerranoCarrasco.rkt")
+(require "TDAUser_20537567_SerranoCarrasco.rkt")
+(require "TDADocumento_20537567_SerranoCarrasco.rkt")
 
 ;-----------------------------------TDA PARADIGMADOCS-----------------------------------------------------------------
 
@@ -255,9 +255,9 @@
 ; Tipo de recursion: Recursion Natural
 ; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios registrados y comprobar si el usuario puede loguearse.
 (define(revisarUserActivoPdocs listUseract nameuseract passwact)
-  (if (null? listUseract)
+  (if (or(or(null? listUseract)(not(string? nameuseract)))(not(string? passwact)))
       #f
-      (if(verificarUsersUser(car listUseract) nameuseract passwact)
+      (if(verificarUsersUser(car listUseract) nameuseract (encryptFn passwact))
          #t
          (revisarUserActivoPdocs(cdr listUseract) nameuseract passwact)
       )
@@ -355,15 +355,20 @@
           (filtrarPorPermisos listfinal (cdr listdocument) user))))
 
 ; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
-; Recorrido: Booleano
-; Descripcion: Verifica si un usuario ya esta registrado, revisando toda la lista de usuarios
+; Recorrido: Un string
+; Descripcion: Encuentra y tranforma la informacion de un usuario (excepto por su password) en un string
 ; Tipo de recursion: Recursion Natural
-; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y comprobar que el user a registrar no este registrado.
+; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y encontrar la informacion correcta
 (define(encontrarDatosUsuarioPdocs listUser nameuser)
   (if(eq?(second(car listUser)) nameuser)
      (string-join (list " Username:"(second(cons (date->string (first(car listUser))) (remove (last(remove(first(car listUser)) (car listUser))) (remove(first(car listUser)) (car listUser))))) "\n" "Fecha de registro:" (first(cons (date->string (first(car listUser))) (remove (last(remove(first(car listUser)) (car listUser))) (remove(first(car listUser)) (car listUser))))) "\n" ))
      (encontrarDatosUsuarioPdocs(cdr listUser) nameuser)))
 
+; Dominio: Una lista (inicialmente vacia), una lista de documentos y un nombre de usuario
+; Recorrido: Una lista que contiene un acceso a un documento
+; Descripcion: Funcion que encuentra si un usuarion tiene un permiso (independiente de cual sea) en un documento
+; Tipo de recursion: Recursion Natural
+; Justificacion de Recursion: Permite recorrer toda la lista de permisos de los documentos
 (define (filtrarPorAccesos listfinal listdocument user)
   (if (eq? listdocument null)
       listfinal
@@ -371,9 +376,17 @@
           (filtrarPorPermisos (cons (car listdocument) listfinal) (cdr listdocument) user)
           (filtrarPorPermisos listfinal (cdr listdocument) user))))
 
+; Dominio: Una lista que contiene sublistas
+; Recorrido: Una lista, pero cuyo texto ahora esta desencryptado
+; Descripcion: Funcion que desencrypta un texto del historial de un documento
+; Tipo de recursion: No se utiliza recursion
 (define (desencryptarHistorial listhist)
   (list (first listhist) (decryptFn (second listhist)) (third listhist)))
 
+; Dominio: Un documento
+; Recorrido: Un documento, con todo su texto desencryptado (version activa e historial)
+; Descripcion: Funcion que desencrypta todo el texto de un documento, este como activo como en el historial
+; Tipo de recursion: No se utiliza recursion
 (define (desencryptarDocs listdoc)
   (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFn(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc)))
 
