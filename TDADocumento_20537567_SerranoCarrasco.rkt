@@ -338,6 +338,20 @@
      (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos: No se ha dado permisos a otros usuarios\n" "Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))
      (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos:" "\n" (string-join(map permisoToString (getPermisosDocumento document)))"Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))))
 
+; Dominio: Una lista (inicialmente vacia), una lista que contiene caracteres de un texto y un numero de caracteres totales
+; Recorrido: Un texto de tipo string
+; Descripcion: Funcion que elimina una cantidad de caracteres, a traves de recorrer una lista y dejar solo los caracteres
+; tal que el largo de la lista final equivalga al numero de caracteres totales. Si el numero de caracteres totales es mayor
+; al largo de la lista de caracteres inicial, se retorna un string vacio.
+; Tipo de recursion: Recursion Natural
+; Justificacion de recursion: Permite recorrer toda la lista hasta que se cumpla la condicion
+(define (deleteCharsDoc listfinal texto numbersFinal)
+  (if ( > 0 numbersFinal)
+      ""
+      (if(eq? (length listfinal) numbersFinal)
+          (list->string listfinal)
+         (deleteCharsDoc (append listfinal (list (car texto) )) (cdr texto) numbersFinal))))
+
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))

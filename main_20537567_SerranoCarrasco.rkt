@@ -46,6 +46,7 @@
           [(eq? operation revokeAllAccesses)  (operation(setUseractivosPdocs paradigmadocs username))]
           [(eq? operation search) (lambda(searchText)(operation(setUseractivosPdocs paradigmadocs username) searchText))]
           [(eq? operation paradigmadocs->string) (operation(setUseractivosPdocs paradigmadocs username))]
+          [(eq? operation delete) (lambda(id date numberOfCharacters)(operation(setUseractivosPdocs paradigmadocs username) id date numberOfCharacters))]
           [else (paradigmadocs)]
           )
         (cond
@@ -56,6 +57,7 @@
           [(eq? operation revokeAllAccesses) (operation paradigmadocs)]
           [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
           [(eq? operation paradigmadocs->string) (operation paradigmadocs)]
+          [(eq? operation delete) (lambda(id date numberOfCharacters)(operation paradigmadocs id date numberOfCharacters))]
           [else (paradigmadocs)]
           )
         )
@@ -183,6 +185,26 @@
       )
   )
 
+;-----------------------------------FUNCION DELETE (OPCIONAL)-------------------------------------------------------------
+
+; Dominio: Una plataforma de tipo paradigmadocs, un ID de tipo integer, una fecha de tipo fecha y un numero de caracteres de tipo integer
+; Recorrido: Una plataforma de tipo paradigmadocs, actualizada en el caso de que la operacion se realice con exito
+; Descripcion: Funcion que elimina una cantidad de caracteres al texto de un documento en especifico. Si no se encuentra el documento, se retorna
+; a paradigmadocs sin modificaciones. Si la cantidad de caracteres a eliminar es mayor al largo del texto, se elimina todo el texto. Se desencrypta
+; el texto para poder eliminar las palabras y luego se vuelve a encryptar, quedando registrado como texto activo y en el historial de versiones.
+; Tipo de recursion: Recursion Natural (Funcion encontrarIDs)
+; Justificacion de recursion: Permite encontrar al documento correcto, recorriendo toda la lista de documentos
+(define (delete paradigmadocs id date numberOfCharacters)
+  (if (null? (getUsersactivosPdocs paradigmadocs))
+      paradigmadocs
+      (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(integer? numberOfCharacters)))
+         (setRemoverActivoPdocs paradigmadocs)
+         (if(eq? (first(getUsersactivosPdocs paradigmadocs)) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
+            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (car(getUsersactivosPdocs paradigmadocs))) #t))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (encryptFn(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
+               (setRemoverActivoPdocs paradigmadocs))))))
+
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION REGISTER-----------------------------------------------------
@@ -293,3 +315,5 @@
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y PARADIGMADOCS->STRING-------------------------
 
 (define gDocs14 (login gDocs9 "user1" "pass1" paradigmadocs->string))
+
+(define gDocs15 ((login gDocs9 "user1" "pass1" delete) 0 (date 20 10 2021) 3))
