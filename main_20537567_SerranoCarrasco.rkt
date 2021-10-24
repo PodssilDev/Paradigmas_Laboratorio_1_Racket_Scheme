@@ -75,7 +75,7 @@
   (if (null? (getUsersactivosPdocs paradigmadocs))
       paradigmadocs
       (if (and(and(date? date)(string? nombre))(string? contenido))
-          (setDocumentoPdocs paradigmadocs (documento (car (getUsersactivosPdocs paradigmadocs)) date nombre (encryptFn contenido) (definirID paradigmadocs)))
+          (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre (encryptFn contenido) (definirID paradigmadocs)))
           (setRemoverActivoPdocs paradigmadocs))))
 
 ;-----------------------------------FUNCION SHARE------------------------------------------------------------------------
@@ -93,7 +93,7 @@
       paradigmadocs
       (if(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc))
           (setRemoverActivoPdocs paradigmadocs)
-          (if(eq? (car(getUsersactivosPdocs paradigmadocs))(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)))
+          (if(eq? (obtenerActivoPdocs paradigmadocs)(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)))
              (setDocumentoPermisosPdocs paradigmadocs (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc) idDoc (filtrarPermisosPdocs (getUsersPdocs paradigmadocs) null (cons  access (car accesses))(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc))))
              (setRemoverActivoPdocs paradigmadocs)))))
 
@@ -112,9 +112,9 @@
       paradigmadocs
       (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? contenidoTexto)))
          (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (first(getUsersactivosPdocs paradigmadocs)) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
             (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
-            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (car(getUsersactivosPdocs paradigmadocs)) ) ) #t)
+            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
                (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
                (setRemoverActivoPdocs paradigmadocs))))))
 
@@ -131,7 +131,7 @@
      paradigmadocs
      (if(or(or(null? (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))(not(integer? idDoc)))(not(integer? idVersion)))
         (setRemoverActivoPdocs paradigmadocs)
-        (if (eq? (first(getUsersactivosPdocs paradigmadocs)) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+        (if (eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
             (setDocumentoPdocs paradigmadocs (restaurarVer (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)idVersion))
             (setRemoverActivoPdocs paradigmadocs)))))
 
@@ -146,9 +146,9 @@
 (define (revokeAllAccesses paradigmadocs)
   (if(null? (getUsersactivosPdocs paradigmadocs))
      paradigmadocs
-     (if(eq? null (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))))
+     (if(eq? null (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)))
         (setRemoverActivoPdocs paradigmadocs)
-        (setListaDocumentosPdocs paradigmadocs (map eliminarPermisos (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))) )))))
+        (setListaDocumentosPdocs paradigmadocs (map eliminarPermisos (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) )))))
 
 ;-----------------------------------FUNCION SEARCH-----------------------------------------------------------------------
 
@@ -162,9 +162,9 @@
 (define(search paradigmadocs searchText)
   (if(or(null? (getUsersactivosPdocs paradigmadocs))(not(string? searchText)))
      null
-     (if(null? (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))))
+     (if(null? (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs))))
         null
-        (map eliminarRastro(filter encontrarTexto (addTextoSearch null (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))) (encryptFn searchText)))))))
+        (map eliminarRastro(filter encontrarTexto (addTextoSearch null (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs) ) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs) )) (encryptFn searchText)))))))
 
 ;-----------------------------------FUNCION PARADIGMADOCS->STRING---------------------------------------------------------
 
@@ -179,7 +179,9 @@
 (define (paradigmadocs->string paradigmadocs)
   (if (null? (getUsersactivosPdocs paradigmadocs))
       (string-join (list " Nombre de la plataforma:" (getNombrePdocs paradigmadocs)"\n" "Fecha de creacion:" (date->string (getFechaPdocs paradigmadocs))"\n" "Usuarios registrados en la plataforma:\n" (string-join(map userToString (getUsersPdocs paradigmadocs))) "\n" "Documentos creados en la plataforma:\n" (string-join(map documentoToString (map desencryptarDocs (getDocumentosPdocs paradigmadocs))))))
-      (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs)))"Los documentos propios del usuario o los cuales puede acceder son:\n" (string-join(map documentoToString (map desencryptarDocs (append (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(first(getUsersactivosPdocs paradigmadocs))) (first(getUsersactivosPdocs paradigmadocs))) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (first(getUsersactivosPdocs paradigmadocs)))))))
+      (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(obtenerActivoPdocs paradigmadocs))"Los documentos propios del usuario o los cuales puede acceder son:\n"
+                         (string-join(map documentoToString (map desencryptarDocs (append (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(obtenerActivoPdocs paradigmadocs))
+                         (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)    )))))
                          )
                    )
       )
@@ -199,12 +201,24 @@
       paradigmadocs
       (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(integer? numberOfCharacters)))
          (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (first(getUsersactivosPdocs paradigmadocs)) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
+         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
             (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
             (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (car(getUsersactivosPdocs paradigmadocs))) #t))
                (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (encryptFn(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
                (setRemoverActivoPdocs paradigmadocs))))))
 
+;-----------------------------------FUNCION SEARCHANDREPLACE (OPCIONAL)---------------------------------------------------
+
+;(define (searchAndReplace paradigmadocs id date searchText replaceText)
+;  (if (null? (getUsersactivosPdocs paradigmadocs))
+;      paradigmadocs
+;      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(string? searchText)))(not(string? replaceText)))
+;         (setRemoverActivoPdocs paradigmadocs)
+;         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+;            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
+;            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+;               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
+;               (setRemoverActivoPdocs paradigmadocs))))))
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION REGISTER-----------------------------------------------------

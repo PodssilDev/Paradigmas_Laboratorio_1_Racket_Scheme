@@ -78,6 +78,11 @@
       (car (cdr (cdr (cdr (cdr document)))))
       null))
 
+(define(getNamePermiso listpermiso)
+  (car listpermiso))
+
+(define (getPermisoPermiso listpermiso)
+  (car (cdr listpermiso)))
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Una lista de historial del texto del documento de tipo list
 ; Descripcion: Funcion que obtiene una lista que contiene todas las versiones del contenido (texto) del documento
@@ -87,6 +92,14 @@
       (car (cdr (cdr (cdr (cdr (cdr document))))))
       null))
 
+(define (getFechaHistorial listhistorial)
+  (car listhistorial))
+
+(define (getTextoHistorial listhistorial)
+  (car (cdr listhistorial)))
+
+(define (getIDHistorial listhistorial)
+  (car (cdr(cdr listhistorial))))
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un ID de documento de tipo integer
 ; Descripcion: Funcion que el ID unico de un documento
@@ -191,7 +204,7 @@
 (define (noEstaPermiso listfinal userpermiso)
   (if (eq? listfinal null)
       #t
-      (if (eq? (first (car listfinal))userpermiso)
+      (if (equal? (getNamePermiso (car listfinal))userpermiso)
           #f
           (noEstaPermiso (cdr listfinal) userpermiso))))
 
@@ -203,7 +216,7 @@
 (define (filtrarPermisosUnicos listfinal listpermisos)
  (if (eq? listpermisos null)
      listfinal
-     (if (noEstaPermiso listfinal (first(car listpermisos)))
+     (if (noEstaPermiso listfinal (getNamePermiso(car listpermisos)))
          (filtrarPermisosUnicos (cons (car listpermisos) listfinal) (cdr listpermisos))
          (filtrarPermisosUnicos listfinal (cdr listpermisos)))))
 
@@ -215,7 +228,7 @@
 (define (TienePermiso? listpermisos userpermiso)
   (if (eq? listpermisos null)
       null
-      (if (eq? (first (car listpermisos))userpermiso)
+      (if (eq? (getNamePermiso (car listpermisos))userpermiso)
           (car listpermisos)
           (TienePermiso? (cdr listpermisos) userpermiso))))
 
@@ -226,7 +239,7 @@
 (define (puedeEscribir listperm)
   (if (eq? listperm null)
       #f
-      (if(eq? (second listperm) #\w)
+      (if(eq? (getPermisoPermiso listperm) #\w)
          #t
          #f)))
 
@@ -238,8 +251,8 @@
 (define(obtenerVersion listHistorial idHist)
   (if(eq? listHistorial null)
      null
-     (if (eq? idHist (third(car listHistorial)))
-         (second(car listHistorial))
+     (if (eq? idHist (getIDHistorial(car listHistorial)))
+         (getTextoHistorial(car listHistorial))
          (obtenerVersion (cdr listHistorial) idHist))))
 
 ; Dominio: Un documento de tipo document y un ID de tipo integer
@@ -265,7 +278,7 @@
 (define (puedeEscribirLeer listperm)
   (if (eq? listperm null)
       #f
-      (if(or(eq? (second listperm) #\w)(eq? (second listperm) #\r))
+      (if(or(eq? (getPermisoPermiso listperm) #\w)(eq? (getPermisoPermiso listperm) #\r))
          #t
          #f)))
 
@@ -287,9 +300,9 @@
 (define (encontrarTextoHistorial listhistorial texto )
   (if(null? listhistorial)
      #f
-     (if(not( eq? (length(string-split (second(car listhistorial)) texto)) (length(list (second(car listhistorial))))))
+     (if(not( eq? (length(string-split (getTextoHistorial(car listhistorial)) texto)) (length(list (getTextoHistorial(car listhistorial))))))
         #t
-        (if (not(eq? (length(string->list(car(string-split(second(car listhistorial)) texto)))) (length(string->list(second(car listhistorial))))))
+        (if (not(eq? (length(string->list(car(string-split(getTextoHistorial(car listhistorial)) texto)))) (length(string->list(getTextoHistorial(car listhistorial))))))
             #t
             (encontrarTextoHistorial (cdr listhistorial) texto)))))
 
@@ -316,18 +329,18 @@
 ; Descripcion: Transforma una lista de permisos en un string
 ; Tipo de recursion: No se utiliza recursion
 (define (permisoToString listperm)
-  (if(eq? (second listperm) #\w)
-     (string-join (list (first listperm)"tiene permiso de escritura""\n "))
-     (if (eq? (second listperm) #\r)
-         (string-join (list (first listperm)"tiene permiso de lectura""\n "))
-         (string-join (list (first listperm)"tiene permiso de comentarios" "\n ")))))
+  (if(eq? (getPermisoPermiso listperm) #\w)
+     (string-join (list (getNamePermiso listperm)"tiene permiso de escritura""\n "))
+     (if (eq? (getPermisoPermiso listperm) #\r)
+         (string-join (list (getNamePermiso listperm)"tiene permiso de lectura""\n "))
+         (string-join (list (getNamePermiso listperm)"tiene permiso de comentarios" "\n ")))))
 
 ; Dominio: Una lista de historial
 ; Recorrido: Un string
 ; Descripcion: Transforma una lista de historial en un string
 ; Tipo de recursion: No se utiliza recursion
 (define (historialToString listhistorial)
-  (string-join (list "Version N°"(number->string (third listhistorial))":" "*"(second listhistorial)"*" "version guardada el dia" (date->string (first listhistorial))"\n")))
+  (string-join (list "Version N°"(number->string (getIDHistorial listhistorial))":" "*"(getTextoHistorial listhistorial)"*" "version guardada el dia" (date->string (getFechaHistorial listhistorial))"\n")))
 
 ; Dominio: Un documento
 ; Recorrido: Un string

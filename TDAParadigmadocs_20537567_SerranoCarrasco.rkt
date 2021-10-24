@@ -110,6 +110,13 @@
       null)
  )
 
+(define (obtenerActivoPdocs docs)
+  (if(isParadigmadocs? docs)
+     (if(null? (getUsersactivosPdocs docs))
+        null
+        (car(getUsersactivosPdocs docs)))
+     null)
+  )
 ; Dominio: Una plataforma de tipo paradigmadocs
 ; Recorrido: Una lista de documentos donde cada elemento tiene el autor de un documento, la fecha de creacion, el nombre y el contenido
 ; Descripcion: Obtiene la lista de documentos creados, donde cada documento tiene su informacion importante
@@ -186,8 +193,9 @@
 (define (setDocumentoPdocs docs document)
   (if(and (and(isParadigmadocs? docs)(isDocumento? document))(not (eq? (getUsersactivosPdocs docs) null)))
      (if(eq? null (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)))
-        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons document(getDocumentosPdocs docs)))
-        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(cons document(remove (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)) (getDocumentosPdocs docs)))))
+        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs))(cons document(getDocumentosPdocs docs)))
+        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs))
+              (cons document(remove (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)) (getDocumentosPdocs docs)))))
      docs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs
@@ -196,7 +204,7 @@
 ; Tipo de recursion: No se utiliza recursion
 (define (setRemoverActivoPdocs docs)
   (if(isParadigmadocs? docs)
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs))(getDocumentosPdocs docs))
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs))(getDocumentosPdocs docs))
      docs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs, un documento de tipo documento, un ID de tipo integer y una lista de permisos de tipo list
@@ -207,7 +215,7 @@
 ; Justificacion de recursion: Sirve para encontrar al documento correcto de acuerdo a su ID
 (define (setDocumentoPermisosPdocs docs document ID listpermisos)
   (if(and(and(isParadigmadocs? docs)(isDocumento? document))(integer? ID))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(first(getUsersactivosPdocs docs))(getUsersactivosPdocs docs)) (cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs docs)ID)(getDocumentosPdocs docs))))
+     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs)) (cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs docs)ID)(getDocumentosPdocs docs))))
      docs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs y un documento de tipo documento
@@ -314,7 +322,7 @@
 (define (filtrarPermisosPdocs listUser listfinal listpermisos autor)
   (if (null? listpermisos)
       listfinal
-      (if (or(revisarUsernPdocs listUser (first(car listpermisos)) autor)(not(verificarPermiso (second(car listpermisos)))))
+      (if (or(revisarUsernPdocs listUser (getNamePermiso(car listpermisos)) autor)(not(verificarPermiso (second(car listpermisos)))))
           (filtrarPermisosPdocs listUser listfinal (cdr listpermisos) autor)
           (filtrarPermisosPdocs listUser (cons (car listpermisos) listfinal) (cdr listpermisos) autor))))
 
@@ -361,7 +369,8 @@
 ; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y encontrar la informacion correcta
 (define(encontrarDatosUsuarioPdocs listUser nameuser)
   (if(eq?(second(car listUser)) nameuser)
-     (string-join (list " Username:"(second(cons (date->string (first(car listUser))) (remove (last(remove(first(car listUser)) (car listUser))) (remove(first(car listUser)) (car listUser))))) "\n" "Fecha de registro:" (first(cons (date->string (first(car listUser))) (remove (last(remove(first(car listUser)) (car listUser))) (remove(first(car listUser)) (car listUser))))) "\n" ))
+     (string-join (list " Username:"(second(cons (date->string (getUsernameUser(car listUser))) (remove (last(remove(getUsernameUser(car listUser)) (car listUser))) (remove(getFechaUser(car listUser)) (car listUser)))))
+                        "\n" "Fecha de registro:" (first(cons (date->string (getFechaUser(car listUser))) (remove (last(remove(getFechaUser(car listUser)) (car listUser))) (remove(getFechaUser(car listUser)) (car listUser))))) "\n" ))
      (encontrarDatosUsuarioPdocs(cdr listUser) nameuser)))
 
 ; Dominio: Una lista (inicialmente vacia), una lista de documentos y un nombre de usuario
@@ -381,7 +390,7 @@
 ; Descripcion: Funcion que desencrypta un texto del historial de un documento
 ; Tipo de recursion: No se utiliza recursion
 (define (desencryptarHistorial listhist)
-  (list (first listhist) (decryptFn (second listhist)) (third listhist)))
+  (list (getFechaHistorial listhist) (decryptFn (getTextoHistorial listhist)) (getIDHistorial listhist)))
 
 ; Dominio: Un documento
 ; Recorrido: Un documento, con todo su texto desencryptado (version activa e historial)
