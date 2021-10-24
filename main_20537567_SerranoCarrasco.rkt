@@ -47,6 +47,8 @@
           [(eq? operation search) (lambda(searchText)(operation(setUseractivosPdocs paradigmadocs username) searchText))]
           [(eq? operation paradigmadocs->string) (operation(setUseractivosPdocs paradigmadocs username))]
           [(eq? operation delete) (lambda(id date numberOfCharacters)(operation(setUseractivosPdocs paradigmadocs username) id date numberOfCharacters))]
+          [(eq? operation searchAndReplace) (lambda(id date searchText replaceText)(operation (setUseractivosPdocs paradigmadocs username) id date searchText replaceText))]
+          [(eq? operation comment) (lambda(idDoc date selectedText commenText) (operation (setUseractivosPdocs paradigmadocs username) idDoc date selectedText commenText))]
           [else (paradigmadocs)]
           )
         (cond
@@ -58,6 +60,8 @@
           [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
           [(eq? operation paradigmadocs->string) (operation paradigmadocs)]
           [(eq? operation delete) (lambda(id date numberOfCharacters)(operation paradigmadocs id date numberOfCharacters))]
+          [(eq? operation searchAndReplace) (lambda(id date searchText replaceText)(operation paradigmadocs id searchText replaceText))]
+          [(eq? operation comment) (lambda(idDoc date selectedText commenText) (operation paradigmadocs idDoc selectedText commenText))]
           [else (paradigmadocs)]
           )
         )
@@ -202,25 +206,35 @@
       (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(integer? numberOfCharacters)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
             (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (car(getUsersactivosPdocs paradigmadocs))) #t))
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (encryptFn(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION SEARCHANDREPLACE (OPCIONAL)---------------------------------------------------
 
-;(define (searchAndReplace paradigmadocs id date searchText replaceText)
-;  (if (null? (getUsersactivosPdocs paradigmadocs))
-;      paradigmadocs
-;      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(string? searchText)))(not(string? replaceText)))
-;         (setRemoverActivoPdocs paradigmadocs)
-;         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-;            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
-;            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-;               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
-;               (setRemoverActivoPdocs paradigmadocs))))))
+(define (searchAndReplace paradigmadocs id date searchText replaceText)
+  (if (null? (getUsersactivosPdocs paradigmadocs))
+      paradigmadocs
+      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(string? searchText)))(not(string? replaceText)))
+         (setRemoverActivoPdocs paradigmadocs)
+         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText) ) date #f))
+            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText)) date #f))
+               (setRemoverActivoPdocs paradigmadocs))))))
 ;-----------------------------------EJEMPLOS PARA LAS FUNCIONES-----------------------------------------------------------
 
+(define (comment paradigmadocs idDoc date selectedText commenText)
+  (if (null? (getUsersactivosPdocs paradigmadocs))
+      paradigmadocs
+      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? selectedText)))(not(string? commenText)))
+         (setRemoverActivoPdocs paradigmadocs)
+         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
+            (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
+               (setRemoverActivoPdocs paradigmadocs))))))
 ;-----------------------------------EJEMPLOS PARA LA FUNCION REGISTER-----------------------------------------------------
 
 ; Nota: emptyGDocs es una plataforma de tipo paradigmadocs. Fue creado dentro de TDA Paradigmadocs.
@@ -331,3 +345,6 @@
 (define gDocs14 (login gDocs9 "user1" "pass1" paradigmadocs->string))
 
 (define gDocs15 ((login gDocs9 "user1" "pass1" delete) 0 (date 20 10 2021) 3))
+
+(define gDocs16 ((login gDocs7000 "user1" "pass1" searchAndReplace) 0 (date 24 10 2021) "doc" "john"))
+(define gDocs17 ((login gDocs7000 "user1" "pass1" comment) 1 (date 24 10 2021) "doc" "Este es un comment"))

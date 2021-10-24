@@ -243,6 +243,13 @@
          #t
          #f)))
 
+(define (puedeComentar listperm)
+  (if (eq? listperm null)
+      #f
+      (if(or(eq? (getPermisoPermiso listperm) #\w)(eq? (getPermisoPermiso listperm)#\c))
+         #t
+         #f)))
+
 ; Dominio: Una lista de historial de versiones (Contiene sublistas con una fecha, texto y un ID de version) y un ID de version de tipo integer
 ; Recorrido: Un texto de tipo string
 ; Descripcion: Funcion que permite obtener al texto correcto que se quiere restaurar. Si el texto no se logra encontrar, se retorna null
