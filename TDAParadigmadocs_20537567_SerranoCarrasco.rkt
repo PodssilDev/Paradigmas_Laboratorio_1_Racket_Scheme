@@ -287,6 +287,9 @@
 (define (access . accessess)
    accessess)
 
+(define (unionAccesos list1 list2)
+  (cons list1 (car list2)))
+
 ; Dominio: Una lista de documentos de tipo list y un ID de tipo integer
 ; Recorrido: Un documento de tipo document
 ; Descripcion: Encuentra a un documento guardado en Paradigmadocs de acuerdo a su ID. Si no lo encuentra, retorna null
@@ -399,6 +402,19 @@
 (define (desencryptarDocs listdoc)
   (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFn(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc)))
 
+(define (applylist listaestilos)
+  (car listaestilos))
+
+(define (aplicarEstilos textoElegido listestilos)
+  (if (null? listestilos)
+      textoElegido
+      (if(equal? (car listestilos)#\u)
+         (aplicarEstilos (string-append "#/u" textoElegido "#/u") (cdr listestilos))
+         (if(equal? (car listestilos)#\b)
+            (aplicarEstilos(string-append "#/b" textoElegido "#/b")(cdr listestilos))
+            (if(equal? (car listestilos)#\i)
+               (aplicarEstilos(string-append "#/i" textoElegido "#/i") (cdr listestilos))
+               (aplicarEstilos textoElegido (cdr listestilos)))))))
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
 
 (define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn) )
