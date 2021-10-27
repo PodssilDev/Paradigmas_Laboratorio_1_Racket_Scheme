@@ -78,11 +78,20 @@
       (car (cdr (cdr (cdr (cdr document)))))
       null))
 
+; Dominio: Una lista de permiso
+; Recorrido: Un nombre, de tipo string
+; Descripcion: Funcion que obtiene el nombre asociado a una lista de permisos
+; Tipo de recursion: No se utiliza recursion
 (define(getNamePermiso listpermiso)
   (car listpermiso))
 
+; Dominio: Una lista de permiso
+; Recorrido: Un permiso, de tipo caracter
+; Descripcion: Funcion que obtiene el permiso asociado a una lista de permisos
+; Tipo de recursion: No se utiliza recursion
 (define (getPermisoPermiso listpermiso)
   (car (cdr listpermiso)))
+
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Una lista de historial del texto del documento de tipo list
 ; Descripcion: Funcion que obtiene una lista que contiene todas las versiones del contenido (texto) del documento
@@ -92,14 +101,27 @@
       (car (cdr (cdr (cdr (cdr (cdr document))))))
       null))
 
+; Dominio: Una lista de una version de un historial
+; Recorrido: Una fecha de tipo fecha 
+; Descripcion: Funcion que obtiene la fecha de registro de una version de un historial correspondiente a un documento
+; Tipo de recursion: No se utiliza recursion
 (define (getFechaHistorial listhistorial)
   (car listhistorial))
 
+; Dominio: Una lista de una version de un historial
+; Recorrido: Un texto de tipo string
+; Descripcion: Funcion que obtiene el texto de una version de un historial correspondiente a un documento
+; Tipo de recursion: No se utiliza recursion
 (define (getTextoHistorial listhistorial)
   (car (cdr listhistorial)))
 
+; Dominio: Una lista de una version de un historial
+; Recorrido: Un ID de tipo integer
+; Descripcion: Funcion que obtiene el ID de una version de un historial correspondiente a un documento
+; Tipo de recursion: No se utiliza recursion
 (define (getIDHistorial listhistorial)
   (car (cdr(cdr listhistorial))))
+
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un ID de documento de tipo integer
 ; Descripcion: Funcion que el ID unico de un documento
@@ -243,6 +265,10 @@
          #t
          #f)))
 
+; Dominio: Una lista de permiso
+; Recorrido: Un booleano
+; Descripcion: Funcion que retorna True si el user en especifico tiene permiso de escritura o comentarios
+; Tipo de recursion: No se utiliza recursion
 (define (puedeComentar listperm)
   (if (eq? listperm null)
       #f
@@ -372,6 +398,10 @@
           (list->string listfinal)
          (deleteCharsDoc (append listfinal (list (car texto) )) (cdr texto) numbersFinal))))
 
+; Dominio: Un elemento de tipo caracter
+; Recorrido: Una elemento de tipo caracter
+; Descripcion: Funcion que toma un elemento de tipo caracter y lo cambia por otro
+; Tipo de recursion: No se utiliza recursion
 (define (mezclarLetras letra)
   (cond
     [(equal? letra #\A) #\Z]
