@@ -171,9 +171,11 @@
 ; Tipo de recursion: No se utiliza recursion
 (define(setContenidoDocumento document newContenido fecha  flag)
   (if (and(and(and(isDocumento? document)(string? newContenido))(date? fecha))(boolean? flag))
-      (if (eq? flag #t)
-       (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)(string-join (list newContenido (getContenidoDocumento document)))(getPermisosDocumento document)(cons(list fecha (string-join (list newContenido (getContenidoDocumento document))) (obtenerIDHistorial document))(getHistorialDocumento document))(getIDDocumento document))
-       (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)newContenido(getPermisosDocumento document)(cons(list fecha newContenido (obtenerIDHistorial document))(getHistorialDocumento document))(getIDDocumento document)))
+      (if (equal? newContenido (getContenidoDocumento document))
+          document
+          (if (eq? flag #t)
+              (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)(string-join (list newContenido (getContenidoDocumento document)))(getPermisosDocumento document)(cons(list fecha (string-join (list newContenido (getContenidoDocumento document))) (obtenerIDHistorial document))(getHistorialDocumento document))(getIDDocumento document))
+              (list (getAutorDocumento document) (getFechaDocumento document)(getNombreDocumento document)newContenido(getPermisosDocumento document)(cons(list fecha newContenido (obtenerIDHistorial document))(getHistorialDocumento document))(getIDDocumento document))))
       document))
 
 ; Dominio: Un documento de tipo documento y una lista que contiene sublistas de permisos (cada sublista tiene un username y el permiso)
