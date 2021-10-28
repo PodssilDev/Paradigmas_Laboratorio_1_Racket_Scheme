@@ -24,8 +24,8 @@
 ; Reocrrido: Un texto (string)
 ; Descripcion: Funcion que recibe un texto y lo modifica. En este caso, la funcion entrega el texto al revez
 ; Tipo de Recursion: No se utiliza recursion
-(define encryptFn (lambda (s) (list->string (reverse (string->list s)))))
-(define decryptFn (lambda (s) (list->string (reverse (string->list s)))))
+(define encryptFunction (lambda (s) (list->string (reverse (string->list s)))))
+(define decryptFunction (lambda (s) (list->string (reverse (string->list s)))))
 
 ; Se crea el constructor de paradigmadocs
 
@@ -34,8 +34,8 @@
 ; registrados, una lista de usuarios activos y una lista de documentos creados, cada uno con su informacion importante.
 ; Descripcion: Corresponde al constructor de la plataforma paradigmadocs.
 ; Tipo de recursion: No se utiliza recursion
-(define (paradigmadocs name fecha encryptFn decryptFunction)
-  (list name fecha encryptFn decryptFunction (list) (list) (list))
+(define (paradigmadocs name fecha encryptFunction decryptFunction)
+  (list name fecha encryptFunction decryptFunction (list) (list) (list))
   )
 
 ;-----------------------------------FUNCIONES DE PERTENENCIA----------------------------------------------------------
@@ -284,7 +284,7 @@
 (define(revisarUserActivoPdocs listUseract nameuseract passwact)
   (if (or(or(null? listUseract)(not(string? nameuseract)))(not(string? passwact)))
       #f
-      (if(verificarUsersUser(car listUseract) nameuseract (encryptFn passwact))
+      (if(verificarUsersUser(car listUseract) nameuseract (encryptFunction passwact))
          #t
          (revisarUserActivoPdocs(cdr listUseract) nameuseract passwact)
       )
@@ -403,14 +403,14 @@
 ; Descripcion: Funcion que desencrypta un texto del historial de un documento
 ; Tipo de recursion: No se utiliza recursion
 (define (desencryptarHistorial listhist)
-  (list (getFechaHistorial listhist) (decryptFn (getTextoHistorial listhist)) (getIDHistorial listhist)))
+  (list (getFechaHistorial listhist) (decryptFunction (getTextoHistorial listhist)) (getIDHistorial listhist)))
 
 ; Dominio: Un documento
 ; Recorrido: Un documento, con todo su texto desencryptado (version activa e historial)
 ; Descripcion: Funcion que desencrypta todo el texto de un documento, este como activo como en el historial
 ; Tipo de recursion: No se utiliza recursion
 (define (desencryptarDocs listdoc)
-  (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFn(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc)))
+  (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFunction(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc)))
 
 ; Dominio: Una lista de lista de sublistas de estilos
 ; Recorrido: Una lista de subestilos
@@ -436,7 +436,7 @@
 
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
 
-(define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFn decryptFn) )
+(define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFunction decryptFunction) )
 (define pertenencia1 (isParadigmadocs? emptyGDocs))
 (define nombre (getNombrePdocs emptyGDocs))
 (define fecha (getFechaPdocs emptyGDocs))

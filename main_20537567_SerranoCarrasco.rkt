@@ -77,7 +77,7 @@
   (if (null? (getUsersactivosPdocs paradigmadocs))
       paradigmadocs
       (if (and(and(date? date)(string? nombre))(string? contenido))
-          (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre (encryptFn contenido) (definirID paradigmadocs)))
+          (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre (encryptFunction contenido) (definirID paradigmadocs)))
           (setRemoverActivoPdocs paradigmadocs))))
 
 ;-----------------------------------FUNCION SHARE------------------------------------------------------------------------
@@ -115,9 +115,9 @@
       (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? contenidoTexto)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction contenidoTexto) date #t))
             (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn contenidoTexto) date #t))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction contenidoTexto) date #t))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION RESTOREVERSION----------------------------------------------------------------
@@ -166,7 +166,7 @@
      null
      (if(null? (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs))))
         null
-        (map eliminarRastro(filter encontrarTexto (addTextoSearch null (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs) ) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs) )) (encryptFn searchText)))))))
+        (map eliminarRastro(filter encontrarTexto (addTextoSearch null (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs) ) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs) )) (encryptFunction searchText)))))))
 
 ;-----------------------------------FUNCION PARADIGMADOCS->STRING---------------------------------------------------------
 
@@ -204,9 +204,9 @@
       (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(integer? numberOfCharacters)))(<= numberOfCharacters 0))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
             (if(eq?(puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (car(getUsersactivosPdocs paradigmadocs))))#t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFn (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION SEARCHANDREPLACE (OPCIONAL)---------------------------------------------------
@@ -222,9 +222,9 @@
       (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(string? searchText)))(not(string? replaceText)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText) ) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFunction (string-replace (decryptFunction(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText) ) date #f))
             (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText)) date #f))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFunction (string-replace (decryptFunction(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText)) date #f))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION APPLYSTYLES (OPCIONAL)--------------------------------------------------------
@@ -241,9 +241,9 @@
       (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? searchText)))(not(list? styles)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
             (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION COMMENT (OPCIONAL)------------------------------------------------------------
@@ -259,9 +259,9 @@
       (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? selectedText)))(not(string? commenText)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)(string-replace (decryptFn(obtenerSinComentario(encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)(string-replace (decryptFunction(obtenerSinComentario(encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
             (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs)(string-replace (decryptFn(obtenerSinComentario (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs)(string-replace (decryptFunction(obtenerSinComentario (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCIONES ENCRYPT Y DECRYPT (OPCIONALES)-------------------------------------------------
@@ -270,7 +270,7 @@
 ; Recorrido: Un texto de tipo string
 ; Descripcion: Funcion que encripta un texto
 ; Tipo de recursion: No se utiliza recursion
-(define (encrypt textoEncrypt)
+(define (encryptFn textoEncrypt)
   (if (string? textoEncrypt)
       (list->string (map mezclarLetras (string->list textoEncrypt)))
       ("")))
@@ -279,7 +279,7 @@
 ; Recorrido: Un texto de tipo string
 ; Descripcion: Funcion que decripta un texto
 ; Tipo de recursion: No se utiliza recursion
-(define (decrypt textoEncrypt)
+(define (decryptFn textoEncrypt)
   (if (string? textoEncrypt)
       (list->string (map mezclarLetras (string->list textoEncrypt)))
       ("")))
@@ -489,11 +489,11 @@
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCIONES ENCRYPT2 Y DECRYPT2 (OPCIONALES)------------
 
-(define gDocs13ae (encrypt "hello"))
-(define gDocs13ad (decrypt "svool"))
+(define gDocs13ae (encryptFn "hello"))
+(define gDocs13ad (decryptFn "svool"))
 
-(define gDocs13be (encrypt "PaRaDiGmAs"))
-(define gDocs13bd (decrypt "KzIzWrTnZh"))
+(define gDocs13be (encryptFn "PaRaDiGmAs"))
+(define gDocs13bd (decryptFn "KzIzWrTnZh"))
 
-(define gDocs13ce (encrypt "Pr0g1MaC9o8-.?"))
-(define gDocs13cd (decrypt "Ki9t8NzX0l1_/!"))
+(define gDocs13ce (encryptFn "Pr0g1MaC9o8-.?"))
+(define gDocs13cd (decryptFn "Ki9t8NzX0l1_/!"))
