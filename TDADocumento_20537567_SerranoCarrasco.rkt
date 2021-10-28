@@ -221,7 +221,7 @@
 ; Dominio: Una lista (inicialmente vacia) y un username de tipo string
 ; Recorrido: Un booleano
 ; Descripcion: Funcion que retorna True si el user no esta en la lista final de permisos
-; Tipo de Recursion: Recursion Natural
+; Tipo de Recursion: Recursion de Cola
 ; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user ya ha sido agregado anteriormente con otro permiso
 (define (noEstaPermiso listfinal userpermiso)
   (if (eq? listfinal null)
@@ -233,7 +233,7 @@
 ; Dominio: Una lista  (inicialmente vacia) y una lista de permisos
 ; Recorrido: Una lista de permisos filtrada
 ; Descripcion: Funcion que filtra la lista de permisos para que un User no aparezca mas de una vez en la lista de permisos
-; Tipo de recursion: Recursion Natural
+; Tipo de recursion: Recursion de Cola
 ; Justificacion de recursion: Permite recorrer toda la lista de permisos y filtrarla correctamente
 (define (filtrarPermisosUnicos listfinal listpermisos)
  (if (eq? listpermisos null)
@@ -245,7 +245,7 @@
 ; Dominio: Una lista de permisos y un username de tipo string
 ; Recorrido: null o una lista que contiene al user y un permiso
 ; Descripcion: Funcion que busca si un user tiene un permiso y retorna la sublista con su permiso
-; Tipo de Recursion: Recursion Natural
+; Tipo de Recursion: Recursion de Cola
 ; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user tiene un permiso o no.
 (define (TienePermiso? listpermisos userpermiso)
   (if (eq? listpermisos null)
@@ -279,7 +279,7 @@
 ; Dominio: Una lista de historial de versiones (Contiene sublistas con una fecha, texto y un ID de version) y un ID de version de tipo integer
 ; Recorrido: Un texto de tipo string
 ; Descripcion: Funcion que permite obtener al texto correcto que se quiere restaurar. Si el texto no se logra encontrar, se retorna null
-; Tipo de Recursion: Recursion Natural
+; Tipo de Recursion: Recursion de Cola
 ; Justificacion de Recursion: Permite recorrer toda la lista del historial de versiones
 (define(obtenerVersion listHistorial idHist)
   (if(eq? listHistorial null)
@@ -318,7 +318,7 @@
 ; Dominio: Una lista (inicialmente vacia), una lissta de documentos y un texto de tipo string
 ; Recorrido: Una lista final donde cada sublista contiene al texto como su elemento final
 ; Descripcion: Funcion que agrega un texto a una parte final de una lista. Retorna una lista grande que contiene a todas las sublistas
-; Tipo de Recursion: Recursion Natural
+; Tipo de Recursion: Recursion de Cola
 ; Justificacion de recursion: Permite recorrer toda la lista de listdocs para agregar el texto a cada sublista
 (define (addTextoSearch listfinal listdocs text)
   (if (null? listdocs)
@@ -328,7 +328,7 @@
 ; Dominio: Una lista de historial de un documento y un texto de tipo string
 ; Recorrido: Un booleano
 ; Descripcion: Funcion que recorre todo el historial de versiones de un documento para encontrar si un texto se encuentra en alguna version
-; Tipo de Recursion: Recursion Natural
+; Tipo de Recursion: Recursion de Cola
 ; Justificacion de recursion: Permite recorrer toda la lista del historial para encontrar si existe una version que tenga un texto en especifico
 (define (encontrarTextoHistorial listhistorial texto )
   (if(null? listhistorial)
@@ -389,7 +389,7 @@
 ; Descripcion: Funcion que elimina una cantidad de caracteres, a traves de recorrer una lista y dejar solo los caracteres
 ; tal que el largo de la lista final equivalga al numero de caracteres totales. Si el numero de caracteres totales es mayor
 ; al largo de la lista de caracteres inicial, se retorna un string vacio.
-; Tipo de recursion: Recursion Natural
+; Tipo de recursion: Recursion de Cola 
 ; Justificacion de recursion: Permite recorrer toda la lista hasta que se cumpla la condicion
 (define (deleteCharsDoc listfinal texto numbersFinal)
   (if ( > 0 numbersFinal)
@@ -475,6 +475,22 @@
     [(equal? letra #\?) #\!]
     [(equal? letra #\!) #\?]
     [else letra]))
+
+; Dominio: Una lista de una version de un documento, pertenenciente al historial
+; Recorrido: Un booleano
+; Descripcion: Funcion que se utiliza para filtrar si una version tiene comentarios o no
+; Tipo de recursion: No se utiliza recursion
+(define (sinComentarios historial)
+  (if (string-contains? (getTextoHistorial historial) "&C&")
+      #f
+      #t))
+
+; Dominio: Un documento de tipo documento
+; Recorrido: Un texto de tipo string
+; Descripcion: Funcion que obtiene el texto de la ultima versión del historial sin comentarios
+; Tipo de recursion: No se utiliza recursion
+(define (obtenerSinComentario documento)
+  (getTextoHistorial (car (filter sinComentarios (getHistorialDocumento documento)))))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
 ;Crear un documento

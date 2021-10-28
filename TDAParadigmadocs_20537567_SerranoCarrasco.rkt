@@ -248,6 +248,11 @@
 
 ;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------
 
+; Dominio: Una lista de usuarios, un usuario de tipo user y un booleano
+; Recorrido: Una lista de usuarios
+; Descripcion: Funcion que de manera recursiva y dependiendo si esta en la lista o no, agrega a un user a la lista
+; Tipo de recursion: Recursion Natural
+; Justificacion de Recursion: Permite recorrer toda la lista y no agregar dos users con el mismo username
 (define (registerNatural lista usuario flag)
   (if(null? lista)
      (if(equal? flag #t)
@@ -421,12 +426,12 @@
 (define (aplicarEstilos textoElegido listestilos)
   (if (null? listestilos)
       textoElegido
-      (if(equal? (car listestilos)#\u)
-         (aplicarEstilos (string-append "#\\u" textoElegido "#\\u") (cdr listestilos))
-         (if(equal? (car listestilos)#\b)
-            (aplicarEstilos(string-append "#\\b" textoElegido "#\\b")(cdr listestilos))
-            (if(equal? (car listestilos)#\i)
-               (aplicarEstilos(string-append "#\\i" textoElegido "#\\i") (cdr listestilos))
+      (if(and(equal? (car listestilos)#\u)(not(string-contains? textoElegido "#\\u")))
+         (aplicarEstilos (string-append " #\\u " textoElegido " #\\u ") (cdr listestilos))
+         (if(and(equal? (car listestilos)#\b)(not(string-contains? textoElegido "#\\b")))
+            (aplicarEstilos(string-append " #\\b " textoElegido " #\\b ")(cdr listestilos))
+            (if(and(equal? (car listestilos)#\i)(not(string-contains? textoElegido "#\\i")))
+               (aplicarEstilos(string-append " #\\i " textoElegido " #\\i ") (cdr listestilos))
                (aplicarEstilos textoElegido (cdr listestilos)))))))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA-----------------------------------------------------------------
@@ -436,7 +441,6 @@
 (define nombre (getNombrePdocs emptyGDocs))
 (define fecha (getFechaPdocs emptyGDocs))
 (define mensaje (getDecryptPdocs emptyGDocs))
-(define cambio (setNombrePdocs emptyGDocs 1233)) ; Ejemplo erroneo
 (define fechacambio (setFechaPdocs emptyGDocs (date 'hi' 10 2021)))
 (define string(setEncryptPdocs emptyGDocs "Un nuevo mensaje para el dia"))
 (define string2(setDecryptPdocs emptyGDocs "Vamos que se puede"))

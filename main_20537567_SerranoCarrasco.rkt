@@ -59,7 +59,7 @@
           [(eq? operation delete) (lambda(id date numberOfCharacters)(operation paradigmadocs id date numberOfCharacters))]
           [(eq? operation searchAndReplace) (lambda(id date searchText replaceText)(operation paradigmadocs id searchText replaceText))]
           [(eq? operation applyStyles) (lambda(idDoc date searchText . styles) (operation paradigmadocs idDoc date searchText styles))]
-          [(eq? operation comment) (lambda(idDoc date selectedText commenText) (operation paradigmadocs idDoc selectedText commenText))]
+          [(eq? operation comment) (lambda(idDoc date selectedText commenText) (operation paradigmadocs idDoc date selectedText commenText))]
           [else (paradigmadocs)]
           )
         )
@@ -196,7 +196,7 @@
 ; Descripcion: Funcion que elimina una cantidad de caracteres al texto de un documento en especifico. Si no se encuentra el documento, se retorna
 ; a paradigmadocs sin modificaciones. Si la cantidad de caracteres a eliminar es mayor al largo del texto, se elimina todo el texto. Se desencrypta
 ; el texto para poder eliminar las palabras y luego se vuelve a encryptar, quedando registrado como texto activo y en el historial de versiones.
-; Tipo de recursion: Recursion Natural (Funcion encontrarIDs)
+; Tipo de recursion: Recursion de Cola (Funcion encontrarIDs)
 ; Justificacion de recursion: Permite encontrar al documento correcto, recorriendo toda la lista de documentos
 (define (delete paradigmadocs id date numberOfCharacters)
   (if (null? (getUsersactivosPdocs paradigmadocs))
@@ -241,9 +241,9 @@
       (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? searchText)))(not(list? styles)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
             (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION COMMENT (OPCIONAL)------------------------------------------------------------
@@ -259,9 +259,9 @@
       (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? selectedText)))(not(string? commenText)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)(string-replace (decryptFn(obtenerSinComentario(encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
             (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFn (string-replace (decryptFn(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs)(string-replace (decryptFn(obtenerSinComentario (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCIONES ENCRYPT Y DECRYPT (OPCIONALES)-------------------------------------------------
@@ -456,7 +456,44 @@
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y APPLYSTYLES----------------------------
 
-;(define gDocs11a ((login gDocs4a )))
-;(define gDocs17 ((login gDocs7000 "user1" "pass1" comment) 1 (date 24 10 2021) "doc" "Este es un comment"))
-;(define gDocs18 ((login gDocs7000 "user1" "pass1" applyStyles) 0 (date 24 10 2021) "doc" "u" "b" "u" "b" ))
-;(define gDocs19 ((login gDocs7000 "user1" "pass1" applyStyles) 0 (date 30 11 2021) "doc" #\b #\i))
+; Contra ejemplo: User 4 se loguea e intenta aplicar estilos en un documento donde no tiene permisos
+(define gDocs11a ((login gDocs5e "user4" "pass4" applyStyles) 0 (date 30 11 2021) "doc" #\b #\u))
+
+; Contra ejemplo: User 1 se loguea  e intenta aplicar permisos a un texto que no esta en el documento
+(define gDocs11b ((login gDocs5e "user1" "pass1" applyStyles) 0 (date 30 11 2021) "documento" #\b #\u))
+
+; Mitad Contra ejemplo: User 1 se loguea y aplica todos los estilos a un texto, pero también intenta aplicar
+; estilos que no existen
+(define gDocs11c ((login gDocs5e "user1" "pass1" applyStyles) 0 (date 28 10 2021) "doc" #\b #\u #\i #\a #\e))
+
+; User 3 se loguea y aplica estilos en un documento donde tiene permisos
+(define gDocs11d ((login gDocs5e "user3" "pass3" applyStyles) 1 (date 28 10 2021) "d" #\u #\i))
+
+; User 2 se loguea y aplica estilos en su documento al texto "doc"
+(define gDocs11e ((login gDocs11c "user2" "pass2" applyStyles) 1 (date 28 10 2021) "doc" #\b))
+
+;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y COMMENT-------------------------------
+
+; Contra ejemplo: User2 intenta comentar, pero no tiene permisos para hacerlo
+(define gDocs12a((login gDocs5e "user2"  "pass2" comment) 0 (date 28 10 2021) "doc" "comment"))
+
+; User 1 se loguea, comenta en el documento 0,el texto "doc"
+(define gDocs12b((login gDocs5e "user1"  "pass1" comment) 0 (date 28 10 2021) "doc" "1st comment"))
+
+; User 1 nuevamente repite la operacion, pero esta vez usa otro comentario. La version activa antigua
+; se queda en el historial, junto con el comentario anterior
+(define gDocs12c((login gDocs12b "user1"  "pass1" comment) 0 (date 28 10 2021) "doc" "2nd comment"))
+
+; User 3 se loguea y comenta en un documento donde tiene permisos
+(define gDocs12d((login gDocs12c "user3"  "pass3" comment) 1 (date 28 10 2021) "doc" "3rd comment"))
+
+;-----------------------------------EJEMPLOS PARA LA FUNCIONES ENCRYPT2 Y DECRYPT2 (OPCIONALES)------------
+
+(define gDocs13ae (encrypt "hello"))
+(define gDocs13ad (decrypt "svool"))
+
+(define gDocs13be (encrypt "PaRaDiGmAs"))
+(define gDocs13bd (decrypt "KzIzWrTnZh"))
+
+(define gDocs13ce (encrypt "Pr0g1MaC9o8-.?"))
+(define gDocs13cd (decrypt "Ki9t8NzX0l1_/!"))
