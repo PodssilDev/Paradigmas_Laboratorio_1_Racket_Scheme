@@ -1,6 +1,8 @@
 #lang racket
-; Se necesita del TDA Fecha para la construccion del TDA Documento
+; Se necesita de los TDA Fecha, TDA Historial y TDA Permiso para la construccion del TDA Documento
 (require "TDAFecha_20537567_SerranoCarrasco.rkt")
+(require "TDAHistorial_20537567_SerranoCarrasco.rkt")
+(require "TDAPermiso_20537567_SerranoCarrasco.rkt")
 
 ;-----------------------------------TDA DOCUMENTO---------------------------------------------------------------
 
@@ -18,7 +20,7 @@
 ; Descripcion: Crea a un documento
 ; Tipo de recursion: No se utiliza recursion
 (define(documento autor fecha nombre_documento contenido_documento ID)
-(list autor fecha nombre_documento contenido_documento (list)(list (list fecha contenido_documento 0)) ID))
+  (list autor fecha nombre_documento contenido_documento (list)(list (historial fecha contenido_documento 0)) ID))
 
 ;-----------------------------------FUNCIONES DE PERTENENCIA----------------------------------------------------
 
@@ -78,20 +80,6 @@
       (car (cdr (cdr (cdr (cdr document)))))
       null))
 
-; Dominio: Una lista de permiso
-; Recorrido: Un nombre, de tipo string
-; Descripcion: Funcion que obtiene el nombre asociado a una lista de permisos
-; Tipo de recursion: No se utiliza recursion
-(define(getNamePermiso listpermiso)
-  (car listpermiso))
-
-; Dominio: Una lista de permiso
-; Recorrido: Un permiso, de tipo caracter
-; Descripcion: Funcion que obtiene el permiso asociado a una lista de permisos
-; Tipo de recursion: No se utiliza recursion
-(define (getPermisoPermiso listpermiso)
-  (car (cdr listpermiso)))
-
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Una lista de historial del texto del documento de tipo list
 ; Descripcion: Funcion que obtiene una lista que contiene todas las versiones del contenido (texto) del documento
@@ -100,27 +88,6 @@
   (if (isDocumento? document)
       (car (cdr (cdr (cdr (cdr (cdr document))))))
       null))
-
-; Dominio: Una lista de una version de un historial
-; Recorrido: Una fecha de tipo fecha 
-; Descripcion: Funcion que obtiene la fecha de registro de una version de un historial correspondiente a un documento
-; Tipo de recursion: No se utiliza recursion
-(define (getFechaHistorial listhistorial)
-  (car listhistorial))
-
-; Dominio: Una lista de una version de un historial
-; Recorrido: Un texto de tipo string
-; Descripcion: Funcion que obtiene el texto de una version de un historial correspondiente a un documento
-; Tipo de recursion: No se utiliza recursion
-(define (getTextoHistorial listhistorial)
-  (car (cdr listhistorial)))
-
-; Dominio: Una lista de una version de un historial
-; Recorrido: Un ID de tipo integer
-; Descripcion: Funcion que obtiene el ID de una version de un historial correspondiente a un documento
-; Tipo de recursion: No se utiliza recursion
-(define (getIDHistorial listhistorial)
-  (car (cdr(cdr listhistorial))))
 
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un ID de documento de tipo integer
@@ -132,35 +99,6 @@
       null))
 
 ;-----------------------------------MODIFICADORES----------------------------------------------------------------
-
-; Dominio: Un documento de tipo documento y un nuevo autor de tipo string
-; Recorrido: Un documento de tipo documento (list)
-; Descripcion: Funcion que modifica el documento y cambia el nombre del autor. Si el formato del autor es incorrecto, retorna el documento sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define(setAutorDocumento document newAutor)
-  (if (and(isDocumento? document)(string? newAutor))
-      (list newAutor (getFechaDocumento document)(getNombreDocumento document)(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
-      document))
-
-; Dominio: Un documento de tipo documento y una nueva fecha de tipo fecha (list)
-; Recorrido: Un documento de tipo documento (list)
-; Descripcion: Funcion que modifica el documento y cambia la fecha de creacion del documento. Si el formato de la fecha es incorrecto,
-; retorna el documento sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define(setFechaDocumento document newFecha)
-  (if (and(and(isDocumento? document)(list? newFecha))(not(empty? newFecha)))
-      (list (getAutorDocumento document) newFecha (getNombreDocumento document)(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
-      document))
-
-; Dominio: Un documento de tipo documento y un nuevo nombre de tipo string
-; Recorrido: Un documento de tipo documento (list)
-; Descripcion: Funcion que modifica el documento y cambia el nombre del documento. Si el formato del nombre es incorrecto, retorna el
-; documento sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define(setNombreDocumento document newNombre)
-  (if (and(isDocumento? document)(string? newNombre))
-      (list (getAutorDocumento document) (getFechaDocumento document)newNombre(getContenidoDocumento document)(getPermisosDocumento document)(getHistorialDocumento document)(getIDDocumento document))
-      document))
 
 ; Dominio: Un documento de tipo documento, un nuevo contenido (texto) de tipo string, una nueva fecha de tipo fecha
 ; y un valor booleano
@@ -210,86 +148,6 @@
       (length (getHistorialDocumento document))
       null))
 
-; Dominio: Un permiso de tipo caracter
-; Recorrido: Un booleano
-; Descripcion: Retorna True si el permiso es valido (Un permiso valido puede ser lectura, comentarios o escritura)
-; Tipo de recursion: No se utiliza recursion
-(define (verificarPermiso permiso)
-  (if (or(or(eq? permiso #\w)(eq? permiso #\r))(eq? permiso #\c))
-      #t
-      #f)
-  )
-
-; Dominio: Una lista (inicialmente vacia) y un username de tipo string
-; Recorrido: Un booleano
-; Descripcion: Funcion que retorna True si el user no esta en la lista final de permisos
-; Tipo de Recursion: Recursion de Cola
-; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user ya ha sido agregado anteriormente con otro permiso
-(define (noEstaPermiso listfinal userpermiso)
-  (if (eq? listfinal null)
-      #t
-      (if (equal? (getNamePermiso (car listfinal))userpermiso)
-          #f
-          (noEstaPermiso (cdr listfinal) userpermiso))))
-
-; Dominio: Una lista  (inicialmente vacia) y una lista de permisos
-; Recorrido: Una lista de permisos filtrada
-; Descripcion: Funcion que filtra la lista de permisos para que un User no aparezca mas de una vez en la lista de permisos
-; Tipo de recursion: Recursion de Cola
-; Justificacion de recursion: Permite recorrer toda la lista de permisos y filtrarla correctamente
-(define (filtrarPermisosUnicos listfinal listpermisos)
- (if (eq? listpermisos null)
-     listfinal
-     (if (noEstaPermiso listfinal (getNamePermiso(car listpermisos)))
-         (filtrarPermisosUnicos (cons (car listpermisos) listfinal) (cdr listpermisos))
-         (filtrarPermisosUnicos listfinal (cdr listpermisos)))))
-
-; Dominio: Una lista de permisos y un username de tipo string
-; Recorrido: null o una lista que contiene al user y un permiso
-; Descripcion: Funcion que busca si un user tiene un permiso y retorna la sublista con su permiso
-; Tipo de Recursion: Recursion de Cola
-; Justificacion de Recursion: Permite recorrer toda la lista final para poder verificar si el user tiene un permiso o no.
-(define (TienePermiso? listpermisos userpermiso)
-  (if (eq? listpermisos null)
-      null
-      (if (eq? (getNamePermiso (car listpermisos))userpermiso)
-          (car listpermisos)
-          (TienePermiso? (cdr listpermisos) userpermiso))))
-
-; Dominio: Una lista de permiso, que contiene un username y un permiso
-; Recorrido: Un booleano
-; Descripcion: Funcion que retorna True si el user en especifico tiene el permiso de escritura
-; Tipo de Recursion: No se utiliza recursion
-(define (puedeEscribir listperm)
-  (if (eq? listperm null)
-      #f
-      (if(eq? (getPermisoPermiso listperm) #\w)
-         #t
-         #f)))
-
-; Dominio: Una lista de permiso
-; Recorrido: Un booleano
-; Descripcion: Funcion que retorna True si el user en especifico tiene permiso de escritura o comentarios
-; Tipo de recursion: No se utiliza recursion
-(define (puedeComentar listperm)
-  (if (eq? listperm null)
-      #f
-      (if(or(eq? (getPermisoPermiso listperm) #\w)(eq? (getPermisoPermiso listperm)#\c))
-         #t
-         #f)))
-
-; Dominio: Una lista de historial de versiones (Contiene sublistas con una fecha, texto y un ID de version) y un ID de version de tipo integer
-; Recorrido: Un texto de tipo string
-; Descripcion: Funcion que permite obtener al texto correcto que se quiere restaurar. Si el texto no se logra encontrar, se retorna null
-; Tipo de Recursion: Recursion de Cola
-; Justificacion de Recursion: Permite recorrer toda la lista del historial de versiones
-(define(obtenerVersion listHistorial idHist)
-  (if(eq? listHistorial null)
-     null
-     (if (eq? idHist (getIDHistorial(car listHistorial)))
-         (getTextoHistorial(car listHistorial))
-         (obtenerVersion (cdr listHistorial) idHist))))
-
 ; Dominio: Un documento de tipo document y un ID de tipo integer
 ; Recorrido: Un documento (lista)
 ; Descripcion: Funcion que permite colocar el texto desde el historial como texto activo
@@ -306,18 +164,7 @@
 (define (eliminarPermisos document)
   (list (getAutorDocumento document) (getFechaDocumento document) (getNombreDocumento document)(getContenidoDocumento document) null (getHistorialDocumento document)(getIDDocumento document)))
 
-; Dominio: Una lista de permisos
-; Recorrido: Un booleano
-; Descripcion: Funcion que retorna True si una lista de un user en especifico tiene el permiso de escribir o leer el documento
-; Recursion: No se utiliza recursion 
-(define (puedeEscribirLeer listperm)
-  (if (eq? listperm null)
-      #f
-      (if(or(eq? (getPermisoPermiso listperm) #\w)(eq? (getPermisoPermiso listperm) #\r))
-         #t
-         #f)))
-
-; Dominio: Una lista (inicialmente vacia), una lissta de documentos y un texto de tipo string
+; Dominio: Una lista (inicialmente vacia), una lista de documentos y un texto de tipo string
 ; Recorrido: Una lista final donde cada sublista contiene al texto como su elemento final
 ; Descripcion: Funcion que agrega un texto a una parte final de una lista. Retorna una lista grande que contiene a todas las sublistas
 ; Tipo de Recursion: Recursion de Cola
@@ -326,20 +173,6 @@
   (if (null? listdocs)
       listfinal
       (addTextoSearch (cons (append(car listdocs) (list text)) listfinal) (cdr listdocs) text)))
-
-; Dominio: Una lista de historial de un documento y un texto de tipo string
-; Recorrido: Un booleano
-; Descripcion: Funcion que recorre todo el historial de versiones de un documento para encontrar si un texto se encuentra en alguna version
-; Tipo de Recursion: Recursion de Cola
-; Justificacion de recursion: Permite recorrer toda la lista del historial para encontrar si existe una version que tenga un texto en especifico
-(define (encontrarTextoHistorial listhistorial texto )
-  (if(null? listhistorial)
-     #f
-     (if(not( eq? (length(string-split (getTextoHistorial(car listhistorial)) texto)) (length(list (getTextoHistorial(car listhistorial))))))
-        #t
-        (if (not(eq? (length(string->list(car(string-split(getTextoHistorial(car listhistorial)) texto)))) (length(string->list(getTextoHistorial(car listhistorial))))))
-            #t
-            (encontrarTextoHistorial (cdr listhistorial) texto)))))
 
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un booleano
@@ -358,24 +191,6 @@
 ; Tipo de recursion: No se utiliza recursion
 (define (eliminarRastro documento)
   (remove (last documento) documento))
-
-; Dominio: Una lista de permisos
-; Recorrido: Un string
-; Descripcion: Transforma una lista de permisos en un string
-; Tipo de recursion: No se utiliza recursion
-(define (permisoToString listperm)
-  (if(eq? (getPermisoPermiso listperm) #\w)
-     (string-join (list (getNamePermiso listperm)"tiene permiso de escritura""\n "))
-     (if (eq? (getPermisoPermiso listperm) #\r)
-         (string-join (list (getNamePermiso listperm)"tiene permiso de lectura""\n "))
-         (string-join (list (getNamePermiso listperm)"tiene permiso de comentarios" "\n ")))))
-
-; Dominio: Una lista de historial
-; Recorrido: Un string
-; Descripcion: Transforma una lista de historial en un string
-; Tipo de recursion: No se utiliza recursion
-(define (historialToString listhistorial)
-  (string-join (list "Version N°"(number->string (getIDHistorial listhistorial))":" "*"(getTextoHistorial listhistorial)"*" "version guardada el dia" (date->string (getFechaHistorial listhistorial))"\n")))
 
 ; Dominio: Un documento
 ; Recorrido: Un string
@@ -478,15 +293,6 @@
     [(equal? letra #\!) #\?]
     [else letra]))
 
-; Dominio: Una lista de una version de un documento, pertenenciente al historial
-; Recorrido: Un booleano
-; Descripcion: Funcion que se utiliza para filtrar si una version tiene comentarios o no
-; Tipo de recursion: No se utiliza recursion
-(define (sinComentarios historial)
-  (if (string-contains? (getTextoHistorial historial) "&C&")
-      #f
-      #t))
-
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un texto de tipo string
 ; Descripcion: Funcion que obtiene el texto de la ultima versión del historial sin comentarios
@@ -495,13 +301,12 @@
   (getTextoHistorial (car (filter sinComentarios (getHistorialDocumento documento)))))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA---------------------------------------------------------------
+
 ;Crear un documento
 (define Doc0001 (documento "John" (date 12 10 2021) "Mi primer documento" "Paradigmas de Programación" 0))
+
 ; Verificar si un documento es correcto
 (define esDocu? (isDocumento? Doc0001))
 
-;(define newcontent (setContenidoDocumento Doc0001 "Este es un texto" (date 14 10 2021)#t))
-
-(define elimin (eliminarPermisos Doc0001))
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

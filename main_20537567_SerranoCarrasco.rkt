@@ -5,6 +5,8 @@
 (require "TDAAccess_20537567_SerranoCarrasco.rkt")
 (require "TDAParadigmadocs_20537567_SerranoCarrasco.rkt")
 (require "TDAUser_20537567_SerranoCarrasco.rkt")
+(require "TDAHistorial_20537567_SerranoCarrasco.rkt")
+(require "TDAPermiso_20537567_SerranoCarrasco.rkt")
 (require "TDADocumento_20537567_SerranoCarrasco.rkt")
 
 ;-----------------------------------FUNCION REGISTER-----------------------------------------------------------------
@@ -33,7 +35,7 @@
 (define(login paradigmadocs username password operation)
   (if(or(not(string? username))(not(string? password)))
      paradigmadocs
-     (if(revisarUserActivoPdocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
+     (if(revisarUserActivoPdocs paradigmadocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
         (cond
           [(eq? operation create) (lambda(date nombre contenido)(operation (setUseractivosPdocs paradigmadocs username) date nombre contenido))]
           [(eq? operation share) (lambda(idDoc access . accesses)(operation (setUseractivosPdocs paradigmadocs username) idDoc access accesses))]
@@ -77,7 +79,7 @@
   (if (null? (getUsersactivosPdocs paradigmadocs))
       paradigmadocs
       (if (and(and(date? date)(string? nombre))(string? contenido))
-          (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre (encryptFunction contenido) (definirID paradigmadocs)))
+          (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre ((getEncryptPdocs paradigmadocs)contenido) (definirID paradigmadocs)))
           (setRemoverActivoPdocs paradigmadocs))))
 
 ;-----------------------------------FUNCION SHARE------------------------------------------------------------------------
@@ -115,9 +117,9 @@
       (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? contenidoTexto)))
          (setRemoverActivoPdocs paradigmadocs)
          (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction contenidoTexto) date #t))
+            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)contenidoTexto) date #t))
             (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction contenidoTexto) date #t))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)contenidoTexto) date #t))
                (setRemoverActivoPdocs paradigmadocs))))))
 
 ;-----------------------------------FUNCION RESTOREVERSION----------------------------------------------------------------

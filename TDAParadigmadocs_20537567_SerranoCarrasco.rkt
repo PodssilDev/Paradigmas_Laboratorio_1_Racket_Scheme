@@ -1,7 +1,9 @@
 #lang racket
-; Se requiere el uso de los TDA Fecha, TDA Access TDA User y TDA Documento para elaborar la construccion del TDA ParadigmaDocs
+; Se requiere el uso de los TDA Fecha, TDA Access TDA User, TDA Historial, TDA Permiso y TDA Documento para elaborar la construccion del TDA ParadigmaDocs
 (require "TDAFecha_20537567_SerranoCarrasco.rkt")
 (require "TDAUser_20537567_SerranoCarrasco.rkt")
+(require "TDAHistorial_20537567_SerranoCarrasco.rkt")
+(require "TDAPermiso_20537567_SerranoCarrasco.rkt")
 (require "TDADocumento_20537567_SerranoCarrasco.rkt")
 (require "TDAAccess_20537567_SerranoCarrasco.rkt")
 
@@ -18,7 +20,7 @@
 
 ;-----------------------------------CONSTRUCTORES---------------------------------------------------------------------
 
-; Primero, se definen las funcioens encryptFn y decryptFn. Ambas funciones hacen encryptan y decryptan texto.
+; Primero, se definen las funcioens encryptFunction y decryptFunction. Ambas funciones hacen encryptan y decryptan texto.
 
 ; Dominio: Un texto (string)
 ; Reocrrido: Un texto (string)
@@ -34,8 +36,8 @@
 ; registrados, una lista de usuarios activos y una lista de documentos creados, cada uno con su informacion importante.
 ; Descripcion: Corresponde al constructor de la plataforma paradigmadocs.
 ; Tipo de recursion: No se utiliza recursion
-(define (paradigmadocs name fecha encryptFunction decryptFunction)
-  (list name fecha encryptFunction decryptFunction (list) (list) (list))
+(define (paradigmadocs name date encryptFunction decryptFunction)
+  (list name date encryptFunction decryptFunction (list) (list) (list))
   )
 
 ;-----------------------------------FUNCIONES DE PERTENENCIA----------------------------------------------------------
@@ -55,9 +57,9 @@
 ; Recorrido: Un nombre de tipo string
 ; Descripcion: Obtiene el nombre de la plataforma en formato string
 ; Tipo de recursion: No se utiliza recursion
-(define (getNombrePdocs docs)
-  (if (isParadigmadocs? docs)
-      (car docs)
+(define (getNombrePdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car pdocs)
       null)
   )
 
@@ -65,9 +67,9 @@
 ; Recorrido: Lista de Enteros de tipo list
 ; Descripcion: Obtiene la fecha de creacion de la plataforma, en formato lista
 ; Tipo de recursion: No se utiliza recursion
-(define (getFechaPdocs docs)
-  (if (isParadigmadocs? docs)
-      (car (cdr docs))
+(define (getFechaPdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car (cdr pdocs))
       null)
   )
 
@@ -75,9 +77,9 @@
 ; Recorrido: Un texto (String) o function
 ; Descripcion: Obtiene el texto guardado en la posicion de encryptFn (o la funcion, en caso de que no haya texto)
 ; Tipo de recursion: No se utiliza recursion
-(define (getEncryptPdocs docs)
-  (if (isParadigmadocs? docs)
-      (car (cdr (cdr docs)))
+(define (getEncryptPdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car (cdr (cdr pdocs)))
       null)
   )
 
@@ -85,9 +87,9 @@
 ; Recorrido: Un texto (String) o function
 ; Descripcion: Obtiene el texto guardado en la posicion de decryptFn (o la funcion, en caso de que no haya texto)
 ; Tipo de recursion: No se utiliza recursion
-(define (getDecryptPdocs docs)
-  (if (isParadigmadocs? docs)
-      (car (cdr (cdr (cdr docs))))
+(define (getDecryptPdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car (cdr (cdr (cdr pdocs))))
       null)
   )
 
@@ -95,9 +97,9 @@
 ; Recorrido: Una lista de usuarios registrados que contiene una fecha, un username y un password(date x string x string)
 ; Descripcion: Obtiene la lista de users registrados guardada en paradigmadocs
 ; Tipo de recursion: No se utiliza recursion
-(define(getUsersPdocs docs)
-  (if (isParadigmadocs? docs)
-      (car(cdr(cdr(cdr (cdr docs)))))
+(define(getUsersPdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car(cdr(cdr(cdr (cdr pdocs)))))
       null)
  )
 
@@ -105,9 +107,9 @@
 ; Recorrido: Una lista de usuarios activos que contiene el nombre del user activo (user logueado correctamente)
 ; Descripcion: Obtiene la lista de usernames de los usuarios activos en Paradigmadocs (Users logueados mediante login)
 ; Tipo de recursion: No se utiliza recursion
-(define(getUsersactivosPdocs docs)
-  (if (isParadigmadocs? docs)
-      (car(cdr(cdr(cdr (cdr (cdr docs))))))
+(define(getUsersactivosPdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car(cdr(cdr(cdr (cdr (cdr pdocs))))))
       null)
  )
 
@@ -115,102 +117,66 @@
 ; Recorrido: Una lista de usuarios activos que contine al user activo
 ; Descripcion: Obtiene al usuario activo de la lista de usuarios activos
 ; Tipo de recursion: No se utiliza recursion
-(define (obtenerActivoPdocs docs)
-  (if(isParadigmadocs? docs)
-     (if(null? (getUsersactivosPdocs docs))
+(define (obtenerActivoPdocs pdocs)
+  (if(isParadigmadocs? pdocs)
+     (if(null? (getUsersactivosPdocs pdocs))
         null
-        (car(getUsersactivosPdocs docs)))
+        (car(getUsersactivosPdocs pdocs)))
      null)
   )
 ; Dominio: Una plataforma de tipo paradigmadocs
 ; Recorrido: Una lista de documentos donde cada elemento tiene el autor de un documento, la fecha de creacion, el nombre y el contenido
 ; Descripcion: Obtiene la lista de documentos creados, donde cada documento tiene su informacion importante
 ; Tipo de recursion: No se utiliza recursion
-(define(getDocumentosPdocs docs)
-  (if (isParadigmadocs? docs)
-      (car(cdr(cdr(cdr (cdr (cdr (cdr docs)))))))
+(define(getDocumentosPdocs pdocs)
+  (if (isParadigmadocs? pdocs)
+      (car(cdr(cdr(cdr (cdr (cdr (cdr pdocs)))))))
       null)
   )
 
 ;-----------------------------------MODIFICADORES-----------------------------------------------------------------
-
-; Dominio: Una plataforma de tipo paradigmadocs y un nombre de tipo string
-; Recorrido: Una plataforma de tipo paradigmadocs actualizada
-; Descripcion: Se modifica el nombre de la plataforma. Si el nombre es invalido, se entrega la plataforma sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define (setNombrePdocs docs newNombre)
-  (if (and (isParadigmadocs? docs)(string? newNombre))
-      (list newNombre (getFechaPdocs docs) (getEncryptPdocs docs) (getDecryptPdocs docs)(getUsersPdocs docs )(getUsersactivosPdocs docs)(getDocumentosPdocs docs))
-      docs))
-
-; Dominio: Una plataforma de tipo paradigmadocs y una fecha de tipo fecha
-; Recorrido: Una plataforma de tipo paradigmadocs actualizada
-; Descripcion: Se modifica la fecha de creacion de la plataforma. Si la fecha es invalida, se entrega la plataforma sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define (setFechaPdocs docs newFecha)
-  (if (and(and(isParadigmadocs? docs)(list? newFecha))(not(empty? newFecha)))
-      (list (getNombrePdocs docs) newFecha (getEncryptPdocs docs) (getDecryptPdocs docs)(getUsersPdocs docs )(getUsersactivosPdocs docs)(getDocumentosPdocs docs))
-      docs))
-
-; Dominio: Una plataforma de tipo paradigmadocs y un texto de tipo string
-; Recorrido: Una plataforma de tipo paradigmadocs actualizada
-; Descripcion: Se modifica el texto en la posicion de encryptFn. Si el texto es invalido, se entrega la plataforma sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define (setEncryptPdocs docs newEncrypt)
-  (if (and (isParadigmadocs? docs)(string? newEncrypt))
-      (list (getNombrePdocs docs) (getFechaPdocs docs) newEncrypt (getDecryptPdocs docs)(getUsersPdocs docs )(getUsersactivosPdocs docs)(getDocumentosPdocs docs))
-      docs))
-
-; Dominio: Una plataforma de tipo paradigmadocs y un texto de tipo string
-; Recorrido: Una plataforma de tipo paradigmadocs actualizada
-; Descripcion: Se modifica el texto en la posicion de decryptFn. Si el texto es invalido, se entrega la plataforma sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define (setDecryptPdocs docs newDecrypt)
-  (if (and (isParadigmadocs? docs)(string? newDecrypt))
-      (list (getNombrePdocs docs) (getFechaPdocs docs) (getEncryptPdocs docs) newDecrypt (getUsersPdocs docs )(getUsersactivosPdocs docs)(getDocumentosPdocs docs))
-      docs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs y un usuario de tipo user
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Se agrega un usuario registrado correctamente a paradigmadocs. Si se intenta registrar incorrectamente, se retorna Paradigmadocs
 ; sin modificaciones
 ; Tipo de recursion: No se utiliza recursion
-(define(setUserPdocs docs lista1)
-  (if(and(isParadigmadocs? docs)(list? lista1))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs) lista1 (getUsersactivosPdocs docs)(getDocumentosPdocs docs))
-     docs))
+(define(setUserPdocs pdocs lista1)
+  (if(and(isParadigmadocs? pdocs)(list? lista1))
+     (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs) lista1 (getUsersactivosPdocs pdocs)(getDocumentosPdocs pdocs))
+     pdocs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs y un username de tipo string
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Se agrega un usuario activo (logueado) a paradigmadocs. Si el usuario no se ha registrado o el formato es incorrecto, se retorna
 ; a paradigmadocs sin modificaciones.
 ; Tipo de recursion: No se utiliza recursion
-(define(setUseractivosPdocs docs usern)
-  (if(and(isParadigmadocs? docs)(string? usern))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(cons usern(getUsersactivosPdocs docs))(getDocumentosPdocs docs))
-     docs))
+(define(setUseractivosPdocs pdocs usern)
+  (if(and(isParadigmadocs? pdocs)(string? usern))
+     (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(cons usern(getUsersactivosPdocs pdocs))(getDocumentosPdocs pdocs))
+     pdocs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs y un documento de tipo documento
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Desloguea a un user activo y agrega un documento a paradigmadocs. Si el formato del documento es incorrecto, se retorna a paradigmadocs
 ; sin modificaciones. También verifica si un documento con el mismo ID ya habia sido agregado (para el caso de querer agregarlo actualizado)
 ; Tipo de recursion: No se utiliza recursion
-(define (setDocumentoPdocs docs document)
-  (if(and (and(isParadigmadocs? docs)(isDocumento? document))(not (eq? (getUsersactivosPdocs docs) null)))
-     (if(eq? null (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)))
-        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs))(cons document(getDocumentosPdocs docs)))
-        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs))
-              (cons document(remove (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)) (getDocumentosPdocs docs)))))
-     docs))
+(define (setDocumentoPdocs pdocs document)
+  (if(and (and(isParadigmadocs? pdocs)(isDocumento? document))(not (eq? (getUsersactivosPdocs pdocs) null)))
+     (if(eq? null (encontrarIDs (getDocumentosPdocs pdocs) (getIDDocumento document)))
+        (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(remove(obtenerActivoPdocs pdocs) (getUsersactivosPdocs pdocs))(cons document(getDocumentosPdocs pdocs)))
+        (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(remove(obtenerActivoPdocs pdocs) (getUsersactivosPdocs pdocs))
+              (cons document(remove (encontrarIDs (getDocumentosPdocs pdocs) (getIDDocumento document)) (getDocumentosPdocs pdocs)))))
+     pdocs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Desloguea a un user activo 
 ; Tipo de recursion: No se utiliza recursion
-(define (setRemoverActivoPdocs docs)
-  (if(isParadigmadocs? docs)
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs))(getDocumentosPdocs docs))
-     docs))
+(define (setRemoverActivoPdocs pdocs)
+  (if(isParadigmadocs? pdocs)
+     (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(remove(obtenerActivoPdocs pdocs) (getUsersactivosPdocs pdocs))(getDocumentosPdocs pdocs))
+     pdocs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs, un documento de tipo documento, un ID de tipo integer y una lista de permisos de tipo list
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
@@ -218,75 +184,47 @@
 ; no corresponde, entonces se devuelve a paradigmadocs sin modificaciones
 ; Tipo de recursion: Recursion de Cola (Funcion encontrarIDs)
 ; Justificacion de recursion: Sirve para encontrar al documento correcto de acuerdo a su ID
-(define (setDocumentoPermisosPdocs docs document ID listpermisos)
-  (if(and(and(isParadigmadocs? docs)(isDocumento? document))(integer? ID))
-     (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(remove(obtenerActivoPdocs docs) (getUsersactivosPdocs docs)) (cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs docs)ID)(getDocumentosPdocs docs))))
-     docs))
+(define (setDocumentoPermisosPdocs pdocs document ID listpermisos)
+  (if(and(and(isParadigmadocs? pdocs)(isDocumento? document))(integer? ID))
+     (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(remove(obtenerActivoPdocs pdocs) (getUsersactivosPdocs pdocs)) (cons (setPermisosDocumento document listpermisos)(remove (encontrarIDs (getDocumentosPdocs pdocs)ID)(getDocumentosPdocs pdocs))))
+     pdocs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs y un documento de tipo documento
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Funcion alternativa de setDocumento, solo que esta no quita al usuario de la seccion activa
 ; Tipo de recursion: No se utiliza recursion
-(define (setDocumentoAlternPdocs docs document)
-  (if(and (and(isParadigmadocs? docs)(isDocumento? document))(not (eq? (getUsersactivosPdocs docs) null)))
-     (if(eq? null (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)))
-        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(getUsersactivosPdocs docs) (cons document(getDocumentosPdocs docs)))
-        (list (getNombrePdocs docs)(getFechaPdocs docs)(getEncryptPdocs docs)(getDecryptPdocs docs)(getUsersPdocs docs)(getUsersactivosPdocs docs) (cons document(remove (encontrarIDs (getDocumentosPdocs docs) (getIDDocumento document)) (getDocumentosPdocs docs)))))
-     docs))
+(define (setDocumentoAlternPdocs pdocs document)
+  (if(and (and(isParadigmadocs? pdocs)(isDocumento? document))(not (eq? (getUsersactivosPdocs pdocs) null)))
+     (if(eq? null (encontrarIDs (getDocumentosPdocs pdocs) (getIDDocumento document)))
+        (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(getUsersactivosPdocs pdocs) (cons document(getDocumentosPdocs pdocs)))
+        (list (getNombrePdocs pdocs)(getFechaPdocs pdocs)(getEncryptPdocs pdocs)(getDecryptPdocs pdocs)(getUsersPdocs pdocs)(getUsersactivosPdocs pdocs) (cons document(remove (encontrarIDs (getDocumentosPdocs pdocs) (getIDDocumento document)) (getDocumentosPdocs pdocs)))))
+     pdocs))
 
 ; Dominio: Una plataforma de tipo paradigmadocs y una lista de documentos de tipo list
 ; Recorrido: Una plataforma de tipo paradigmadocs actualizada
 ; Descripcion: Funcion que permite agregar toda la lista de documentos a paradigmadocs
 ; Tipo de recursion: Recursion de Cola
 ; Justificacion de recursion: Permite que todos los documentos sean agregados
-(define (setListaDocumentosPdocs docs listdocumentos)
+(define (setListaDocumentosPdocs pdocs listdocumentos)
   (if (eq? null listdocumentos)
-      docs
+      pdocs
       (if (eq? (length listdocumentos) 1)
-          (setListaDocumentosPdocs (setDocumentoPdocs docs (car listdocumentos)) (cdr listdocumentos))
-          (setListaDocumentosPdocs (setDocumentoAlternPdocs docs (car listdocumentos)) (cdr listdocumentos)))))
+          (setListaDocumentosPdocs (setDocumentoPdocs pdocs (car listdocumentos)) (cdr listdocumentos))
+          (setListaDocumentosPdocs (setDocumentoAlternPdocs pdocs (car listdocumentos)) (cdr listdocumentos)))))
 
 ;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------
-
-; Dominio: Una lista de usuarios, un usuario de tipo user y un booleano
-; Recorrido: Una lista de usuarios
-; Descripcion: Funcion que de manera recursiva y dependiendo si esta en la lista o no, agrega a un user a la lista
-; Tipo de recursion: Recursion Natural
-; Justificacion de Recursion: Permite recorrer toda la lista y no agregar dos users con el mismo username
-(define (registerNatural lista usuario flag)
-  (if(null? lista)
-     (if(equal? flag #t)
-        null
-        (cons usuario null))
-     (if(not(equal? (getUsernameUser usuario) (getUsernameUser (car lista))))
-        (cons (car lista) (registerNatural (cdr lista) usuario flag))
-        (cons (car lista) (registerNatural (cdr lista) usuario #t)))))
-
-; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
-; Recorrido: Booleano
-; Descripcion: Verifica si un usuario ya esta registrado, revisando toda la lista de usuarios
-; Tipo de recursion: Recursion de Cola
-; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y comprobar que el user a registrar no este registrado.
-(define(revisarUsuarioPdocs listUser nameuser)
-  (if (null? listUser)
-      #t
-      (if(not(usersIguales?(car listUser) nameuser))
-         (revisarUsuarioPdocs(cdr listUser) nameuser)
-         #f)
-      )
-  )
 
 ; Dominio: Una lista de usuarios registrados de tipo list, un username de tipo string y un password de tipo string
 ; Recorrido: Booleano
 ; Descripcion: Verifica si un usuario esta registrado y si su password coincide, lo que le permite loguearse correctamente. 
 ; Tipo de recursion: Recursion de Cola
 ; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios registrados y comprobar si el usuario puede loguearse.
-(define(revisarUserActivoPdocs listUseract nameuseract passwact)
+(define(revisarUserActivoPdocs pdocs listUseract nameuseract passwact)
   (if (or(or(null? listUseract)(not(string? nameuseract)))(not(string? passwact)))
       #f
-      (if(verificarUsersUser(car listUseract) nameuseract (encryptFunction passwact))
+      (if(verificarUsersUser(getPrimeroListUser listUseract) nameuseract ((getEncryptPdocs pdocs) passwact))
          #t
-         (revisarUserActivoPdocs(cdr listUseract) nameuseract passwact)
+         (revisarUserActivoPdocs pdocs (getSiguientesListUser listUseract) nameuseract passwact)
       )
   ))
 
@@ -319,9 +257,9 @@
 (define(revisarUsernPdocs listUser nameuser autor)
   (if (null? listUser)
       #t
-      (if(not(usernamesIguales?(car listUser) nameuser autor))
+      (if(not(usernamesIguales?(getPrimeroListUser listUser) nameuser autor))
          #f
-         (revisarUsernPdocs(cdr listUser) nameuser autor)
+         (revisarUsernPdocs(getSiguientesListUser listUser) nameuser autor)
       )
   ))
 
@@ -334,9 +272,9 @@
 (define (filtrarPermisosPdocs listUser listfinal listpermisos autor)
   (if (null? listpermisos)
       listfinal
-      (if (or(revisarUsernPdocs listUser (getNamePermiso(car listpermisos)) autor)(not(verificarPermiso (second(car listpermisos)))))
-          (filtrarPermisosPdocs listUser listfinal (cdr listpermisos) autor)
-          (filtrarPermisosPdocs listUser (cons (car listpermisos) listfinal) (cdr listpermisos) autor))))
+      (if (or(revisarUsernPdocs listUser (getNamePermiso(getPrimeroListPermiso listpermisos)) autor)(not(verificarPermiso (getPermisoPermiso(getPrimeroListPermiso listpermisos)))))
+          (filtrarPermisosPdocs listUser listfinal (getSiguientesListPermiso listpermisos) autor)
+          (filtrarPermisosPdocs listUser (cons (getPrimeroListPermiso listpermisos) listfinal) (getSiguientesListPermiso listpermisos) autor))))
 
 ; Dominio: Una lista vacia, una lista de documentos de tipo list y un nombre de usuario de tipo string
 ; Recorrido: Una lista con documentos, donde todos los documentos tienen al mismo autor
@@ -381,10 +319,10 @@
 ; Tipo de recursion: Recursion de Cola
 ; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y encontrar la informacion correcta
 (define(encontrarDatosUsuarioPdocs listUser nameuser)
-  (if(eq?(second(car listUser)) nameuser)
-     (string-join (list " Username:"(second(cons (date->string (getUsernameUser(car listUser))) (remove (last(remove(getUsernameUser(car listUser)) (car listUser))) (remove(getFechaUser(car listUser)) (car listUser)))))
-                        "\n" "Fecha de registro:" (first(cons (date->string (getFechaUser(car listUser))) (remove (last(remove(getFechaUser(car listUser)) (car listUser))) (remove(getFechaUser(car listUser)) (car listUser))))) "\n" ))
-     (encontrarDatosUsuarioPdocs(cdr listUser) nameuser)))
+  (if(eq?(getUsernameUser(getPrimeroListUser listUser)) nameuser)
+     (string-join (list " Username:"(second(cons (date->string (getUsernameUser(getPrimeroListUser listUser))) (remove (last(remove(getUsernameUser(getPrimeroListUser listUser)) (getPrimeroListUser listUser))) (remove(getFechaUser(getPrimeroListUser listUser)) (getPrimeroListUser listUser)))))
+                        "\n" "Fecha de registro:" (first(cons (date->string (getFechaUser(car listUser))) (remove (last(remove(getFechaUser(car listUser)) (car listUser))) (remove(getFechaUser(car listUser)) (getPrimeroListUser listUser))))) "\n" ))
+     (encontrarDatosUsuarioPdocs(getSiguientesListUser listUser) nameuser)))
 
 ; Dominio: Una lista (inicialmente vacia), una lista de documentos y un nombre de usuario
 ; Recorrido: Una lista que contiene un acceso a un documento
@@ -438,12 +376,6 @@
 
 (define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFunction decryptFunction) )
 (define pertenencia1 (isParadigmadocs? emptyGDocs))
-(define nombre (getNombrePdocs emptyGDocs))
-(define fecha (getFechaPdocs emptyGDocs))
-(define mensaje (getDecryptPdocs emptyGDocs))
-(define fechacambio (setFechaPdocs emptyGDocs (date 'hi' 10 2021)))
-(define string(setEncryptPdocs emptyGDocs "Un nuevo mensaje para el dia"))
-(define string2(setDecryptPdocs emptyGDocs "Vamos que se puede"))
 
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

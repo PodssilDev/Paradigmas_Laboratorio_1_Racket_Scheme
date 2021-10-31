@@ -2,6 +2,7 @@
 ; Se requiere el uso del TDA Fecha para elaborar la construcción del TDA User
 (require "TDAFecha_20537567_SerranoCarrasco.rkt")
 
+; NOTA: No fue necesario crear modificadores para este TDA.
 ;-----------------------------------TDA USER-----------------------------------------------------------------
 
 ;-----------------------------------REPRESENTACION-----------------------------------------------------------
@@ -34,7 +35,7 @@
 
 ;-----------------------------------SELECTORES---------------------------------------------------------------
 
-; Dominio: Funcion que recibe un usuario de tipo de dato user
+; Dominio: Un usuario de tipo de dato user
 ; Recorrido: Una fecha (lista)
 ; Descripcion: Obtiene la fecha de registro del usuario
 ; Tipo de recursion: No se utiliza recursion 
@@ -44,7 +45,7 @@
      null)
   )
 
-; Dominio: Funcion que recibe un usuario de tipo de dato user
+; Dominio: Un usuario de tipo de dato user
 ; Recorrido: Devuelve un nombre de usuario (string)
 ; Descripcion: Obtiene el username del usuario
 ; Tipo de recursion: No se utiliza recursion
@@ -54,7 +55,7 @@
          null)
   )
 
-; Dominio: Funcion que recibe un usuario de tipo de dato user
+; Dominio: Un usuario de tipo de dato user
 ; Recorrido: Devuelve una contraseña de un usuario (string)
 ; Descripcion: Obtiene la contraseña de un usuario
 ; Tipo de recursion: No se utiliza recursion
@@ -64,36 +65,53 @@
      null)
   )
 
-;-----------------------------------MODIFICADORES-------------------------------------------------------------
-
-; Dominio: Recibe un usuario de tipo user y una fecha de tipo fecha
-; Recorrido: Un usuario de tipo user (lista)
-; Descripcion: Modifica la fecha. Si la fecha es erronea, devuelve al user sin modificaciones
+; Dominio: Una lista que contiene a usuarios (user X user X user... X user)
+; Recorrido: Un usuario de tipo user
+; Descripcion: Funcion que obtiene al primer usuario de la lista de users
 ; Tipo de recursion: No se utiliza recursion
-(define (setFechaUser usuario newFecha)
-  (if (and(and(isUser? usuario)(list? newFecha))(not(empty? newFecha)))
-      (user newFecha  (getUsernameUser usuario) (getPasswordUser usuario))
-      usuario))
+(define (getPrimeroListUser listUsuarios)
+  (if (list? listUsuarios)
+      (car listUsuarios)
+      null))
 
-; Dominio: Recibe un usuario de tipo user y un nombre de usuario de tipo string
-; Recorrido: Un usuario de tipo user (lista)
-; Descripcion: Modifica el username. Si el username no es de tipo string, devuelve al user sin modificaciones
+; Dominio: Una lista que contiene a usuarios (user X user X user... X user)
+; Recorrido: Una lista de usuarios de tipo user
+; Descripcion: Funcion que obtiene a los siguientes elementos de la lista (ignorando el primero)
 ; Tipo de recursion: No se utiliza recursion
-(define (setUsernameUser usuario newUser)
-  (if (and (isUser? usuario)(string? newUser))
-      (user (getFechaUser usuario) newUser (getPasswordUser usuario))
-      usuario))
-
-; Dominio: Recibe un usuario de tipo user y un password de usuario de tipo string
-; Recorrido: Un usuario de tipo user (lista)
-; Descripcion: Modifica el password del user. Si el password no es de tipo string, devuelve al user sin modificaciones
-; Tipo de recursion: No se utiliza recursion
-(define (setPasswordUser usuario newPassword)
-  (if (and (isUser? usuario)(string? newPassword))
-      (user (getFechaUser usuario) (getUsernameUser usuario) newPassword)
-      usuario))
+(define (getSiguientesListUser listUsuarios)
+  (if(list? listUsuarios)
+     (cdr listUsuarios)
+     null))
 
 ;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------
+
+; Dominio: Una lista de usuarios, un usuario de tipo user y un booleano
+; Recorrido: Una lista de usuarios
+; Descripcion: Funcion que de manera recursiva y dependiendo si esta en la lista o no, agrega a un user a la lista
+; Tipo de recursion: Recursion Natural
+; Justificacion de Recursion: Permite recorrer toda la lista y no agregar dos users con el mismo username
+(define (registerNatural lista usuario flag)
+  (if(null? lista)
+     (if(equal? flag #t)
+        null
+        (cons usuario null))
+     (if(not(equal? (getUsernameUser usuario) (getUsernameUser (getPrimeroListUser lista))))
+        (cons (getPrimeroListUser lista) (registerNatural (getSiguientesListUser lista) usuario flag))
+        (cons (getPrimeroListUser lista) (registerNatural (getSiguientesListUser lista) usuario #t)))))
+
+; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
+; Recorrido: Booleano
+; Descripcion: Verifica si un usuario ya esta registrado, revisando toda la lista de usuarios
+; Tipo de recursion: Recursion de Cola
+; Justificacion de Recursion: Sirve para verificar toda la lista de usuarios y comprobar que el user a registrar no este registrado.
+(define(revisarUsuarioPdocs listUser nameuser)
+  (if (null? listUser)
+      #t
+      (if(not(usersIguales?(getPrimeroListUser listUser) nameuser))
+         (revisarUsuarioPdocs(getSiguientesListUser listUser) nameuser)
+         #f)
+      )
+  )
 
 ; Dominio: Dos usuarios de tipo user
 ; Recorrido: Un booleano
@@ -138,10 +156,7 @@
 ;-----------------------------------EJEMPLOS DE PRUEBA--------------------------------------------------------------
 
 (define user000 (user(date 07 10 2021) "MrDoopliss" "Test01"))
-(define user2 (user (date 07 10 2021) "MrDoopliss" "Test01"))
-(define obtener_pass (getPasswordUser user2))
-(define cambiopass(setPasswordUser user2 "pikachu0709"))
-(define compareusersnames (verificarUsersUser user000 "MrDoopliss" "Test01"))
+(define obtener_pass (getPasswordUser user000))
 
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))

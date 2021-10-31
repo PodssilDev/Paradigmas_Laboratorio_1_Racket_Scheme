@@ -1,6 +1,6 @@
 #lang racket
-; NOTA: ESTE TDA YA ESTABA CREADO Y FUE DESCARGADO DE UVIRTUAL. SOLO SE HICIERON ALGUNAS PEQUEÑAS MODIFICACIONES
-
+; NOTA: ESTE TDA FUE SACADO DE UVIRTUAL Y FUE MODIFICADO PARA EL TRABAJO DE LABORATORIO
+; No fue necesario crear modificadores para este TDA
 ;-----------------------------------TDA FECHA-----------------------------------------------------------------
 
 ;----------------------------------REPRESENTACION-------------------------------------------------------------
@@ -29,8 +29,8 @@
 ; Dominio: Elemento de cualquier tipo
 ; Recorrido: Un Booleano
 ; Descripción: Función que permite determinar si un elemento cualquiera es del tipo fecha
-;             se implementa a partir del constructor
-;             evaluando el retorno
+; se implementa a partir del constructor
+; evaluando el retorno
 ; Tipo de recursion: No se utiliza recursion
 (define (date? f)
   (and (list? f) 
@@ -40,8 +40,8 @@
 
 ;-----------------------------------SELECTORES-------------------------------------------------------------------------------
 
-; Dominio: fecha
-; Recorrido: entero
+; Dominio: Una fecha
+; Recorrido: Un numero de tipo entero
 ; Descripción: Función que retorna el día en una fecha
 ; Tipo de recursion: No se utiliza recursion
 (define (getDia f)
@@ -51,8 +51,8 @@
    )
  )
 
-; Dominio: fecha
-; Recorrido: entero
+; Dominio: Una Fecha
+; Recorrido: Un numero de tipo entero
 ; Descripción: Función que retorna el mes en una fecha
 ; Tipo de recursion: No se utiliza recursion
 (define (getMes f)
@@ -62,49 +62,14 @@
    )  
 )
 
-; Dominio: fecha
-; Recorrido: entero
+; Dominio: Una fecha 
+; Recorrido: Un numero de tipo entero
 ; Descripción: Función que retorna el año en una fecha
 ; Tipo de recursion: No se utiliza recursion
 (define (getAgno f)
  (if (date? f)
        (caddr f)
        0
-   )
- )
-
-;-----------------------------------MODIFICADORES-------------------------------------------------------------------------------
-
-; Dominio: fecha x entero
-; Recorrido: fecha
-; Descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al día
-; Tipo de recursion: No se utiliza recursion
-(define (setDia f nd)
-  (if (date? f)
-      (date nd (getMes f) (getAgno f))
-      null
-   )
- )
-
-; Dominio: fecha x entero
-; Recorrido: fecha
-; Descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al mes
-; Tipo de recursion: No se utiliza recursion
-(define (setMes f nm)
-  (if (date? f)
-      (date (getDia f) nm (getAgno f))
-      null
-   )
- )
-
-; Dominio: fecha x entero
-; Recorrido: fecha
-; Descripción: Función que crea una nueva fecha a partir de una fecha de entrada reemplazando el valor correspondiente al año
-; Tipo de recursion: No se utiliza recursion
-(define (setAgno f na)
-  (if (date? f)
-      (date (getDia f) (getMes f) na)
-      null
    )
  )
 
@@ -120,24 +85,10 @@
    )
 )
 
-;descripción: función que retorna el siguiente año para una fecha
-;dom: fecha
-;rec: entero
-(define (nextAgno f)
-  (if (date? f)
-      (setAgno f (+ 1 (getAgno f)))
-      null
-  )
- )
-
-;LAS SIGUIENTES TRES FUNCIONES SON COMPLEMENTARIAS/AUXILIARES AL TDA. NO FORMAN PARTE DEL TDA FECHA, PERO
-;EL TDA FECHA LAS EMPLEA PARA PODER REALIZAR SU TRABAJO. ESTAS FUNCIONES DE IGUAL FORMA PUEDEN
-;SER EMPLEADAS INDEPENDIENTEMENTE DE LA EXISTENCIA DEL TDA FECHA, POR LO QUE NO EXISTE ACOPLAMIENTO CON EL TDA.
-;POR OTRO LADO, EL TDA SEGUN LA IMPLEMENTACION REALIZADA A CONTINUACION, ESTA ACOPLADO A ESTAS FUNCIONES.
-
-;descripción: función para determinar si un año es bisiesto
-;dom: entero
-;rec: boolean
+; Dominio: Un numero de tipo entero
+; Recorrido: Un booleano
+; Descripción: Función para determinar si un año es bisiesto
+; Tipo de recursion: No se utiliza recursion
 (define (bisiesto? a)
   (if (and (integer? a) (not (= a 0)))
       (or (= (remainder a 400) 0)
@@ -146,9 +97,10 @@
   )
 )
 
-;descripción: función para determinar los días de un mes
-;dom: entero X entero
-;rec: entero
+; Dominio: Dos numeros de tipo entero
+; Recorrido: Un numero de tipo entero
+; Descripción: Función para determinar los días de un mes
+; Tipo de recursion: No se utiliza recursion
 (define (getDiasDelMes m a)
   (if (and (integer? m) (integer? a) (not (= a 0))
            (> m 0) (< m 13))
@@ -166,9 +118,10 @@
    )
  )
 
-;descripción: función que transforma un mes entero a su nombre en string
-;dom: entero
-;rec: string
+; Dominio: Un numero entero
+; Recorrido: Un texto de tipo string
+; Descripción: Función que transforma un mes entero a su nombre en string
+; Tipo de recursion: No se utiliza recursion
 (define (getMonthName m)
       (cond ((not (and (integer? m) (> m 0) (< m 13))) "")
             ((= m 1) "Enero")

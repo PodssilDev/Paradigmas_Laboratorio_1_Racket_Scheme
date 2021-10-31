@@ -1,5 +1,5 @@
 #lang racket
-
+; NOTA: No fue necesario crear funciones de pertenencia y modificadores para este TDA.
 ;-----------------------------------TDA ACCESS------------------------------------------------------------------------
 
 ;-----------------------------------REPRESENTACION--------------------------------------------------------------------
