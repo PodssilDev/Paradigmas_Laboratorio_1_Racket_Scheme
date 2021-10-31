@@ -59,6 +59,24 @@
       (car (cdr (cdr listhistorial)))
       null))
 
+; Dominio: Una lista de listas de versiones de un historial (historial X historial X historial ... X historial)
+; Recorrido: Una lista version de un historial
+; Descripcion: Funcion que obtiene la primera lista de versiones de un historial de una lista
+; Tipo de recursion: No se utiliza recursion
+(define (getPrimeroListHistorial listaHistorial)
+  (if(list? listaHistorial)
+     (car listaHistorial)
+     null))
+
+; Dominio: Una lista de listas de versiones de un historial (historial X historial X historial ... X historial)
+; Recorrido: Una lista version de un historial
+; Descripcion: Funcion que obtiene la primera lista de versiones de un historial de una lista
+; Tipo de recursion: No se utiliza recursion
+(define (getSiguientesListHistorial listaHistorial)
+  (if(list? listaHistorial)
+     (cdr listaHistorial)
+     null))
+
 ;-----------------------------------OTRAS FUNCIONES---------------------------------------------------------------
 
 ; Dominio: Una lista de historial de versiones (Contiene sublistas con una fecha, texto y un ID de version) y un ID de version de tipo integer
@@ -69,9 +87,9 @@
 (define(obtenerVersion listHistorial idHist)
   (if(eq? listHistorial null)
      null
-     (if (eq? idHist (getIDHistorial(car listHistorial)))
-         (getTextoHistorial(car listHistorial))
-         (obtenerVersion (cdr listHistorial) idHist))))
+     (if (eq? idHist (getIDHistorial(getPrimeroListHistorial listHistorial)))
+         (getTextoHistorial(getPrimeroListHistorial listHistorial))
+         (obtenerVersion (getSiguientesListHistorial listHistorial) idHist))))
 
 ; Dominio: Una lista de historial de un documento y un texto de tipo string
 ; Recorrido: Un booleano
@@ -81,18 +99,20 @@
 (define (encontrarTextoHistorial listhistorial texto )
   (if(null? listhistorial)
      #f
-     (if(not( eq? (length(string-split (getTextoHistorial(car listhistorial)) texto)) (length(list (getTextoHistorial(car listhistorial))))))
+     (if(not( eq? (length(string-split (getTextoHistorial(getPrimeroListHistorial listhistorial)) texto)) (length(list (getTextoHistorial(getPrimeroListHistorial listhistorial))))))
         #t
-        (if (not(eq? (length(string->list(car(string-split(getTextoHistorial(car listhistorial)) texto)))) (length(string->list(getTextoHistorial(car listhistorial))))))
+        (if (not(eq? (length(string->list(car(string-split(getTextoHistorial(getPrimeroListHistorial listhistorial)) texto)))) (length(string->list(getTextoHistorial(getPrimeroListHistorial listhistorial))))))
             #t
-            (encontrarTextoHistorial (cdr listhistorial) texto)))))
+            (encontrarTextoHistorial (getSiguientesListHistorial listhistorial) texto)))))
 
 ; Dominio: Una lista de historial
 ; Recorrido: Un string
 ; Descripcion: Transforma una lista de historial en un string
 ; Tipo de recursion: No se utiliza recursion
 (define (historialToString listhistorial)
-  (string-join (list "Version N°"(number->string (getIDHistorial listhistorial))":" "*"(getTextoHistorial listhistorial)"*" "version guardada el dia" (date->string (getFechaHistorial listhistorial))"\n")))
+  (if(not(list? listhistorial))
+     ""
+     (string-join (list "Version N°"(number->string (getIDHistorial listhistorial))":" "*"(getTextoHistorial listhistorial)"*" "version guardada el dia" (date->string (getFechaHistorial listhistorial))"\n"))))
 
 ; Dominio: Una lista de una version de un documento, pertenenciente al historial
 ; Recorrido: Un booleano

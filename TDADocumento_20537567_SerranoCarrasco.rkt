@@ -98,6 +98,24 @@
       (car (cdr (cdr (cdr (cdr (cdr (cdr document)))))))
       null))
 
+; Dominio: Una lista de documentos (documento X documento X documento ... X documento)
+; Recorrido: Un documento de tipo documento
+; Descripcion: Funcion que obtiene el primer documento de una lsta de documentos
+; Tipo de recursion: No se utiliza recursion
+(define(getPrimeroListDocumento listDocumento)
+  (if(list? listDocumento)
+     (car listDocumento)
+     null))
+
+; Dominio: Una lista de documentos (documento X documento X documento ... X documento)
+; Recorrido: Una lista de documentos
+; Descripcion: Funcion que obtiene la lista de documentos sin el primer elemento de esta.
+; Tipo de recursion: No se utiliza recursion
+(define(getSiguientesListDocumento listDocumento)
+  (if(list? listDocumento)
+     (cdr listDocumento)
+     null))
+
 ;-----------------------------------MODIFICADORES----------------------------------------------------------------
 
 ; Dominio: Un documento de tipo documento, un nuevo contenido (texto) de tipo string, una nueva fecha de tipo fecha
@@ -128,6 +146,15 @@
 
 ;-----------------------------------OTRAS FUNCIONES---------------------------------------------------------------
 
+; Dominio: Dos listas que contienen documentos
+; Recorrido: Una sola lista que contiene documentos
+; Descripcion: Funcion que une dos listas de documentos en una sola
+; Tipo de recursion: No se utiliza recursion.
+(define(unirListasDocumentos listdoc1 listdoc2)
+  (if(and(list? listdoc1)(list? listdoc2))
+     (append listdoc1 listdoc2)
+     null))
+
 ; Dominio: Un documento de tipo documento y un ID de tipo integer
 ; Recorrido: Un booleano (o null en el caso de que document no corresponda a un documento valido)
 ; Descripcion: Funcion que verifica si un documento tiene un ID en especifico.
@@ -138,6 +165,18 @@
          #t
          #f)
       null))
+
+; Dominio: Una lista de documentos de tipo list y un ID de tipo integer
+; Recorrido: Un documento de tipo document
+; Descripcion: Encuentra a un documento guardado en Paradigmadocs de acuerdo a su ID. Si no lo encuentra, retorna null
+; Tipo de recursion: Recursion de Cola
+; Justificacion de recursion: Sirve para poder recorrer toda la lista de documentos de paradigmadocs y asi poder encontrar al documento correcto.
+(define (encontrarIDs listdocs ID1)
+  (if (null? listdocs)
+      null
+      (if (verificarIDs (getPrimeroListDocumento listdocs) ID1)
+          (car listdocs)
+          (encontrarIDs (getSiguientesListDocumento listdocs) ID1))))
 
 ; Dominio: Un documento de tipo dcumento
 ; Recorrido: Un ID de tipo integer
@@ -172,7 +211,7 @@
 (define (addTextoSearch listfinal listdocs text)
   (if (null? listdocs)
       listfinal
-      (addTextoSearch (cons (append(car listdocs) (list text)) listfinal) (cdr listdocs) text)))
+      (addTextoSearch (cons (append(getPrimeroListDocumento listdocs) (list text)) listfinal) (getSiguientesListDocumento listdocs) text)))
 
 ; Dominio: Un documento de tipo documento
 ; Recorrido: Un booleano
@@ -198,8 +237,8 @@
 ; Tipo de recursion: No se utiliza su recursion
 (define (documentoToString document)
   (if(null? (getPermisosDocumento document))
-     (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos: No se ha dado permisos a otros usuarios\n" "Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))
-     (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento:"(getContenidoDocumento document)"\n" "Permisos:" "\n" (string-join(map permisoToString (getPermisosDocumento document)))"Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document)))))))
+     (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento (Version Actual):"(getContenidoDocumento document)"\n" "Permisos: No se ha dado permisos a otros usuarios\n" "Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document))) "ID Documento:" (number->string(getIDDocumento document))"\n"))
+     (string-join (list "---------\n" "Autor:" (getAutorDocumento document)"\n" "Fecha de creacion:"(date->string(getFechaDocumento document))"\n" "Nombre de Documento:"(getNombreDocumento document) "\n" "Contenido Documento (Version Actual):"(getContenidoDocumento document)"\n" "Permisos:" "\n" (string-join(map permisoToString (getPermisosDocumento document)))"Historial de versiones:" "\n"(string-join(map historialToString (getHistorialDocumento document))) "ID Documento:" (number->string(getIDDocumento document))"\n"))))
 
 ; Dominio: Una lista (inicialmente vacia), una lista que contiene caracteres de un texto y un numero de caracteres totales
 ; Recorrido: Un texto de tipo string

@@ -91,13 +91,15 @@
 ; Tipo de recursion: Recursion Natural
 ; Justificacion de Recursion: Permite recorrer toda la lista y no agregar dos users con el mismo username
 (define (registerNatural lista usuario flag)
-  (if(null? lista)
-     (if(equal? flag #t)
-        null
-        (cons usuario null))
-     (if(not(equal? (getUsernameUser usuario) (getUsernameUser (getPrimeroListUser lista))))
-        (cons (getPrimeroListUser lista) (registerNatural (getSiguientesListUser lista) usuario flag))
-        (cons (getPrimeroListUser lista) (registerNatural (getSiguientesListUser lista) usuario #t)))))
+  (if(or(or(not(isUser? usuario))(not(list? lista)))(not(boolean? flag)))
+     null
+     (if(null? lista)
+        (if(equal? flag #t)
+           null
+           (cons usuario null))
+        (if(not(equal? (getUsernameUser usuario) (getUsernameUser (getPrimeroListUser lista))))
+           (cons (getPrimeroListUser lista) (registerNatural (getSiguientesListUser lista) usuario flag))
+           (cons (getPrimeroListUser lista) (registerNatural (getSiguientesListUser lista) usuario #t))))))
 
 ; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
 ; Recorrido: Booleano
@@ -151,7 +153,9 @@
 ; Descripcion: Funcion que transforma toda la informacion de un usuario (username, password y fecha de registro) en un string
 ; Tipo de recursion: No se utiliza recursion
 (define (userToString usuario)
-  (string-join (list "---------\n"  "Username:" (getUsernameUser usuario)"\n" "Password:" (getPasswordUser usuario) "\n" "Fecha de registro:" (date->string(getFechaUser usuario))"\n")))
+  (if(isUser? usuario)
+     (string-join (list "---------\n"  "Username:" (getUsernameUser usuario)"\n" "Password:" (getPasswordUser usuario) "\n" "Fecha de registro:" (date->string(getFechaUser usuario))"\n"))
+     ""))
 
 ;-----------------------------------EJEMPLOS DE PRUEBA--------------------------------------------------------------
 

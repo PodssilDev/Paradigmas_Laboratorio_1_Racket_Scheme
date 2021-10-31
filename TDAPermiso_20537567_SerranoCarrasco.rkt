@@ -74,9 +74,12 @@
 ; Descripcion: Retorna True si el permiso es valido (Un permiso valido puede ser lectura, comentarios o escritura)
 ; Tipo de recursion: No se utiliza recursion
 (define (verificarPermiso permiso)
-  (if (or(or(eq? permiso #\w)(eq? permiso #\r))(eq? permiso #\c))
-      #t
-      #f)
+  (if(not(char-alphabetic? permiso))
+     #f
+     (if (or(or(eq? permiso #\w)(eq? permiso #\r))(eq? permiso #\c))
+         #t
+         #f)
+     )
   )
 
 ; Dominio: Una lista (inicialmente vacia) y un username de tipo string

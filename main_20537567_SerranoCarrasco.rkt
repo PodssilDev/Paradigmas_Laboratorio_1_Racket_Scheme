@@ -5,7 +5,7 @@
 (require "TDAAccess_20537567_SerranoCarrasco.rkt")
 (require "TDAParadigmadocs_20537567_SerranoCarrasco.rkt")
 (require "TDAUser_20537567_SerranoCarrasco.rkt")
-(require "TDAHistorial_20537567_SerranoCarrasco.rkt")
+(require "TDAHistorial_20537567_SerranoCarrasco.rkt") ; Se utiliza en TDADocumento
 (require "TDAPermiso_20537567_SerranoCarrasco.rkt")
 (require "TDADocumento_20537567_SerranoCarrasco.rkt")
 
@@ -33,7 +33,7 @@
 ; Tipo de recursion: Recursion de Cola (Llamado a la funcion recursiva revisarUserActivoPdocs)
 ; Justificacion de recursion: Es necesario para verificar si un usuario ya esta registrado y si el password coincide correctamente
 (define(login paradigmadocs username password operation)
-  (if(or(not(string? username))(not(string? password)))
+  (if(or(or(not(isParadigmadocs? paradigmadocs))(not(string? username)))(not(string? password)))
      paradigmadocs
      (if(revisarUserActivoPdocs paradigmadocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
         (cond
@@ -59,7 +59,7 @@
           [(eq? operation search)(lambda(searchText)(operation paradigmadocs searchText))]
           [(eq? operation paradigmadocs->string) (operation paradigmadocs)]
           [(eq? operation delete) (lambda(id date numberOfCharacters)(operation paradigmadocs id date numberOfCharacters))]
-          [(eq? operation searchAndReplace) (lambda(id date searchText replaceText)(operation paradigmadocs id searchText replaceText))]
+          [(eq? operation searchAndReplace) (lambda(id date searchText replaceText)(operation paradigmadocs id date searchText replaceText))]
           [(eq? operation applyStyles) (lambda(idDoc date searchText . styles) (operation paradigmadocs idDoc date searchText styles))]
           [(eq? operation comment) (lambda(idDoc date selectedText commenText) (operation paradigmadocs idDoc date selectedText commenText))]
           [else (paradigmadocs)]
@@ -76,11 +76,13 @@
 ; una lista de permisos, un historial de versiones y un ID de documento. Guarda el documento en Paradigmadocs
 ; Tipo de recursion: No se utiliza recursion
 (define(create paradigmadocs date nombre contenido)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if (and(and(date? date)(string? nombre))(string? contenido))
-          (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre ((getEncryptPdocs paradigmadocs)contenido) (definirID paradigmadocs)))
-          (setRemoverActivoPdocs paradigmadocs))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if (and(and(date? date)(string? nombre))(string? contenido))
+             (setDocumentoPdocs paradigmadocs (documento (obtenerActivoPdocs paradigmadocs) date nombre ((getEncryptPdocs paradigmadocs)contenido) (definirID paradigmadocs)))
+             (setRemoverActivoPdocs paradigmadocs)))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION SHARE------------------------------------------------------------------------
 
@@ -93,13 +95,15 @@
 ; Tipo de recursion: Recursion de Cola (Funcion encontrarIDs, Funcion filtrarPermisosUnicos)
 ; Justificacion de Recursion: Permite encontrar al documento correcto a traves de su ID y también filtrar la lista de permisos para que no hayan usuarios repetidos
 (define(share paradigmadocs idDoc access . accesses)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc))
-          (setRemoverActivoPdocs paradigmadocs)
-          (if(eq? (obtenerActivoPdocs paradigmadocs)(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)))
-             (setDocumentoPermisosPdocs paradigmadocs (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc) idDoc (filtrarPermisosPdocs (getUsersPdocs paradigmadocs) null (unionAccesos access accesses) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc))))
-             (setRemoverActivoPdocs paradigmadocs)))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc))
+            (setRemoverActivoPdocs paradigmadocs)
+            (if(eq? (obtenerActivoPdocs paradigmadocs)(getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)))
+               (setDocumentoPermisosPdocs paradigmadocs (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc) idDoc (filtrarPermisosPdocs (getUsersPdocs paradigmadocs) null (unionAccesos access accesses) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc))))
+               (setRemoverActivoPdocs paradigmadocs))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION ADD---------------------------------------------------------------------------
 
@@ -112,15 +116,17 @@
 ; Justificacion de Recursion: Permite encontrar el documento correcto a traves de su ID y tambien permite verificar la lista de permisos para ver si
 ; el usuario logueado puede escribir en el documento obtenido a traves del ID.
 (define (add paradigmadocs idDoc date contenidoTexto)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? contenidoTexto)))
-         (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)contenidoTexto) date #t))
-            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? contenidoTexto)))
+            (setRemoverActivoPdocs paradigmadocs)
+            (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
                (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)contenidoTexto) date #t))
-               (setRemoverActivoPdocs paradigmadocs))))))
+               (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+                  (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)contenidoTexto) date #t))
+                  (setRemoverActivoPdocs paradigmadocs)))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION RESTOREVERSION----------------------------------------------------------------
 
@@ -131,13 +137,15 @@
 ; Tipo de recursion: Recursion de Cola (Funcion encontrarIDs y restaurarVer)
 ; Justificacion de Recursion: Permite encontrar al documento correcto de acuerdo a su ID y a la version correcta del texto desde el historial
 (define (restoreVersion paradigmadocs idDoc idVersion)
-  (if(null? (getUsersactivosPdocs paradigmadocs))
-     paradigmadocs
-     (if(or(or(null? (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))(not(integer? idDoc)))(not(integer? idVersion)))
-        (setRemoverActivoPdocs paradigmadocs)
-        (if (eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs (restaurarVer (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)idVersion))
-            (setRemoverActivoPdocs paradigmadocs)))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if(null? (getUsersactivosPdocs paradigmadocs))
+        paradigmadocs
+        (if(or(or(null? (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))(not(integer? idDoc)))(not(integer? idVersion)))
+           (setRemoverActivoPdocs paradigmadocs)
+           (if (eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+               (setDocumentoPdocs paradigmadocs (restaurarVer (encontrarIDs (getDocumentosPdocs paradigmadocs)idDoc)idVersion))
+               (setRemoverActivoPdocs paradigmadocs))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION REVOKEALLACCESSES----------------------------------------------------------------
 
@@ -148,11 +156,13 @@
 ; Tipo de recursion: Recursion de Cola (setListaDocumentosPdocs)
 ; Justificacion de recursion: Permite modificar a todos los documentos de un usuario en especifico
 (define (revokeAllAccesses paradigmadocs)
-  (if(null? (getUsersactivosPdocs paradigmadocs))
-     paradigmadocs
-     (if(eq? null (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)))
-        (setRemoverActivoPdocs paradigmadocs)
-        (setListaDocumentosPdocs paradigmadocs (map eliminarPermisos (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) )))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if(null? (getUsersactivosPdocs paradigmadocs))
+        paradigmadocs
+        (if(eq? null (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)))
+           (setRemoverActivoPdocs paradigmadocs)
+           (setListaDocumentosPdocs paradigmadocs (map eliminarPermisos (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) ))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION SEARCH-----------------------------------------------------------------------
 
@@ -164,11 +174,13 @@
 ; Tipo de recursion: Recursion de Cola (obtenerDocumentosUser, obtenerDocumentosAutor, encontrarTexto)
 ; Justificacion de recursion: Permite encontrar a todos los documentos correctos (de acuerdo al user logueado) y a recorrer todo el historial
 (define(search paradigmadocs searchText)
-  (if(or(null? (getUsersactivosPdocs paradigmadocs))(not(string? searchText)))
-     null
-     (if(null? (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if(or(null? (getUsersactivosPdocs paradigmadocs))(not(string? searchText)))
         null
-        (map eliminarRastro(filter encontrarTexto (addTextoSearch null (append (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs) ) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs) )) (encryptFunction searchText)))))))
+        (if(null? (unirListasDocumentos (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs))))
+           null
+           (map eliminarRastro(filter encontrarTexto (addTextoSearch null (unirListasDocumentos (filtrarPorPermisos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)) (obtenerActivoPdocs paradigmadocs) ) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs) )) ((getEncryptPdocs paradigmadocs) searchText))))))
+     null))
 
 ;-----------------------------------FUNCION PARADIGMADOCS->STRING---------------------------------------------------------
 
@@ -181,15 +193,16 @@
 ; creados en la plataforma, los cuales contienen toda su informacion.
 ; Tipo de recursion: No se utiliza recursion
 (define (paradigmadocs->string paradigmadocs)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      (string-join (list " Nombre de la plataforma:" (getNombrePdocs paradigmadocs)"\n" "Fecha de creacion:" (date->string (getFechaPdocs paradigmadocs))"\n" "Usuarios registrados en la plataforma:\n" (string-join(map userToString (getUsersPdocs paradigmadocs))) "\n" "Documentos creados en la plataforma:\n" (string-join(map documentoToString (map desencryptarDocs (getDocumentosPdocs paradigmadocs))))))
-      (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(obtenerActivoPdocs paradigmadocs))"Los documentos propios del usuario o los cuales puede acceder son:\n"
-                         (string-join(map documentoToString (map desencryptarDocs (append (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(obtenerActivoPdocs paradigmadocs))
-                         (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)    )))))
-                         )
-                   )
-      )
-  )
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         (string-join (list " Nombre de la plataforma:" (getNombrePdocs paradigmadocs)"\n" "Fecha de creacion:" (date->string (getFechaPdocs paradigmadocs))"\n" "Usuarios registrados en la plataforma:\n" (string-join(map userToString (getUsersPdocs paradigmadocs))) "\n" "Documentos creados en la plataforma:\n" (string-join(map documentoToString (map desencryptarDocs (getDocumentosPdocs paradigmadocs))))))
+         (string-join (list (encontrarDatosUsuarioPdocs (getUsersPdocs paradigmadocs)(obtenerActivoPdocs paradigmadocs))"Los documentos propios del usuario o los cuales puede acceder son:\n"
+                            (string-join(map documentoToString (map desencryptarDocs (unirListasDocumentos (filtrarPorAccesos null (obtenerDocumentosUser null (getDocumentosPdocs paradigmadocs)(obtenerActivoPdocs paradigmadocs))
+                            (obtenerActivoPdocs paradigmadocs)) (obtenerDocumentosAutor null (getDocumentosPdocs paradigmadocs) (obtenerActivoPdocs paradigmadocs)    )))))
+                            )
+                      )
+         )
+     "El paradigmadocs ingresado no es valido!"))
 
 ;-----------------------------------FUNCION DELETE (OPCIONAL)-------------------------------------------------------------
 
@@ -201,52 +214,58 @@
 ; Tipo de recursion: Recursion de Cola (Funcion encontrarIDs)
 ; Justificacion de recursion: Permite encontrar al documento correcto, recorriendo toda la lista de documentos
 (define (delete paradigmadocs id date numberOfCharacters)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(integer? numberOfCharacters)))(<= numberOfCharacters 0))
-         (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
-            (if(eq?(puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (car(getUsersactivosPdocs paradigmadocs))))#t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list(encryptFunction (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
-               (setRemoverActivoPdocs paradigmadocs))))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(integer? numberOfCharacters)))(<= numberOfCharacters 0))
+            (setRemoverActivoPdocs paradigmadocs)
+            (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list( (getEncryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list( (getEncryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters) )) date #f))
+               (if(eq?(puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (obtenerActivoPdocs paradigmadocs))) #t)
+                  (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) ((getEncryptPdocs paradigmadocs)(deleteCharsDoc null (string->list( (getEncryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id)))) ( -(length(string->list( (getEncryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs)id))))) numberOfCharacters))) date #f)
+                  (setRemoverActivoPdocs paradigmadocs)))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION SEARCHANDREPLACE (OPCIONAL)---------------------------------------------------
 
 ; Dominio: Una plataforma de tipo paradigmadocs, un ID de tipo integer, una fecha de tipo fecha, y dos strings
-; Recorrido: Una plataforma de tipo paradigmadocs, actualizada
+; Recorrido: Una plataforma de tipo paradigmadocs, actualizada en el caso de que la funcion tenga exito
 ; Descripcion: Funcion que busca un texto en especifico en un documento y lo reemplaza si es que la busqueda fue exitosa.
 ; Si se intenta buscar un documento que no existe o no se reemplaza el texto, se retorna a paradigmadocs sin modificaciones
 ; Tipo de recursion: Recursion de Cola
 (define (searchAndReplace paradigmadocs id date searchText replaceText)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(string? searchText)))(not(string? replaceText)))
-         (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFunction (string-replace (decryptFunction(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText) ) date #f))
-            (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) (encryptFunction (string-replace (decryptFunction(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText)) date #f))
-               (setRemoverActivoPdocs paradigmadocs))))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (not(date? date))) (not(integer? id))) (not(string? searchText)))(not(string? replaceText)))
+            (setRemoverActivoPdocs paradigmadocs)
+            (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) id)))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ( (getEncryptPdocs paradigmadocs) (string-replace ( (getDecryptPdocs paradigmadocs)(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText) ) date #f))
+               (if(eq? (puedeEscribir(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+                  (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) id) ( (getEncryptPdocs paradigmadocs) (string-replace ( (getDecryptPdocs paradigmadocs)(getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) id))) searchText replaceText)) date #f))
+                  (setRemoverActivoPdocs paradigmadocs)))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION APPLYSTYLES (OPCIONAL)--------------------------------------------------------
 
 ; Dominio: Una plataforma de tipo paradigmadocs, un ID de tipo integer, una fecha de tipo fecha, un texto de tipo string y
 ; una lista de estilos especificos
-; Recorrido: Una plataforma de tipo paradigmadocs, actualizada
+; Recorrido: Una plataforma de tipo paradigmadocs, actualizada en el caso de que la funcion tenga exito
 ; Descripcion: Funcion que aplica una cantidad de determinada de estilos a un texto. Se omiten los estilos no validos
 ; y si se intenta aplicar a un texto que no existe o a un documento que no existe, se retorna a paradigmadocs sin modificaciones
 ; Tipo de recursion: Recursion de Cola
 (define (applyStyles paradigmadocs idDoc date searchText . styles)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? searchText)))(not(list? styles)))
-         (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
-            (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) (encryptFunction (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
-               (setRemoverActivoPdocs paradigmadocs))))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? searchText)))(not(list? styles)))
+            (setRemoverActivoPdocs paradigmadocs)
+            (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs) (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
+               (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+                  (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs) (string-replace ((getDecryptPdocs paradigmadocs) (getContenidoDocumento (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) searchText (aplicarEstilos searchText (applylist styles)) )) date #f))
+                  (setRemoverActivoPdocs paradigmadocs)))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCION COMMENT (OPCIONAL)------------------------------------------------------------
 
@@ -256,15 +275,17 @@
 ; el documento, se retorna a paradigmadocs sin modificaciones
 ; Tipo de recursion: Recursion de Cola
 (define (comment paradigmadocs idDoc date selectedText commenText)
-  (if (null? (getUsersactivosPdocs paradigmadocs))
-      paradigmadocs
-      (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? selectedText)))(not(string? commenText)))
-         (setRemoverActivoPdocs paradigmadocs)
-         (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
-            (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)(string-replace (decryptFunction(obtenerSinComentario(encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
-            (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
-               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs)(string-replace (decryptFunction(obtenerSinComentario (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
-               (setRemoverActivoPdocs paradigmadocs))))))
+  (if(isParadigmadocs? paradigmadocs)
+     (if (null? (getUsersactivosPdocs paradigmadocs))
+         paradigmadocs
+         (if(or(or(or(or(null? (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (not(date? date))) (not(integer? idDoc))) (not(string? selectedText)))(not(string? commenText)))
+            (setRemoverActivoPdocs paradigmadocs)
+            (if(eq? (obtenerActivoPdocs paradigmadocs) (getAutorDocumento(encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)))
+               (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ((getEncryptPdocs paradigmadocs)(string-replace ( (getDecryptPdocs paradigmadocs)(obtenerSinComentario(encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&")) ) date #f))
+               (if(eq? (puedeComentar(TienePermiso? (getPermisosDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc)) (obtenerActivoPdocs paradigmadocs) ) ) #t)
+                  (setDocumentoPdocs paradigmadocs(setContenidoDocumento (encontrarIDs (getDocumentosPdocs paradigmadocs) idDoc) ( (getEncryptPdocs paradigmadocs)(string-replace ( (getDecryptPdocs paradigmadocs)(obtenerSinComentario (encontrarIDs(getDocumentosPdocs paradigmadocs) idDoc))) selectedText (string-append selectedText "&C&(" commenText ")&C&"))) date #f))
+                  (setRemoverActivoPdocs paradigmadocs)))))
+     paradigmadocs))
 
 ;-----------------------------------FUNCIONES ENCRYPT Y DECRYPT (OPCIONALES)-------------------------------------------------
 
@@ -328,12 +349,9 @@
 ; Contra ejemplo erroneo:  User 3 se loguea correctamente pero intenta darse permisos en un documento que no es de su propiedad
 (define gDocs3a ((login gDocs2f "user3" "pass3" share) 0 (access "user3" #\c)))
 
-; Contra ejemplo: Se intenta usar share sin loguear y se intenta dar acceso a un documento que no existe
-(define gDocs3b (share gDocs3a 3 (access "user2" #\c)))
-
 ; Mitad Contra Ejemplo: User 1 se loguea correctamente, pero intenta dar permisos a un User que no esta registrado, aunque se le dan
 ; permisos correctamente a User 3, luego intenta darse permisos a si mismo e intenta dar un permiso que no existe a user 3
-(define gDocs3c ((login gDocs3b "user1" "pass1" share) 2 (access "user6" #\r)(access "user1" #\c) (access "user3" #\w) (access "user3" #\b)))
+(define gDocs3c ((login gDocs3a "user1" "pass1" share) 2 (access "user6" #\r)(access "user1" #\c) (access "user3" #\w) (access "user3" #\b)))
 
 ; User 1 se loguea correctamente y le da acceso de lectura al user 2 para el documento 0
 (define gDocs3d ((login gDocs3c "user1" "pass1" share) 0 (access "user2" #\r)))
@@ -386,7 +404,7 @@
 (define gDocs6b (login gDocs6a "user2" "pass2" revokeAllAccesses))
 
 ; User 3 se loguea e intenta quitar permisos, pero no tiene documentos
-(define gDocs6c (login gDocs6a "user3" "pass3" revokeAllAccesses))
+(define gDocs6c (login gDocs6b "user3" "pass3" revokeAllAccesses))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y SEARCH----------------------------------------
 
@@ -447,8 +465,8 @@
 ; Contra ejemplo: User 1 se loguea pero intenta reemplazar de manera incorrecta
 (define gDocs10a ((login gDocs5e "user1" "pass1" searchAndReplace) 0 (date 24 10 2021) 2323232 "john"))
 
-; User 1 se loguea correctamente y reemplaza "oc" por "ac" en el documento 0
-(define gDocs10b ((login gDocs5e "user1" "pass1" searchAndReplace) 0 (date 27 10 2021) "oc" "ac"))
+; User 1 se loguea correctamente y reemplaza "oc" por "ae" en el documento 0
+(define gDocs10b ((login gDocs5e "user1" "pass1" searchAndReplace) 0 (date 27 10 2021) "oc" "ae"))
 
 ; User 2 se loguea y reemplaza "doc" por "document" en el documento 1
 (define gDocs10c ((login gDocs5e "user2" "pass2" searchAndReplace) 1 (date 27 10 2021) "doc1" "document"))
@@ -475,6 +493,7 @@
 (define gDocs11e ((login gDocs11c "user2" "pass2" applyStyles) 1 (date 28 10 2021) "doc" #\b))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCION LOGIN Y COMMENT-------------------------------
+; Los comentarios se simbolizan con &C&(commentario)&C&
 
 ; Contra ejemplo: User2 intenta comentar, pero no tiene permisos para hacerlo
 (define gDocs12a((login gDocs5e "user2"  "pass2" comment) 0 (date 28 10 2021) "doc" "comment"))
@@ -490,6 +509,8 @@
 (define gDocs12d((login gDocs12c "user3"  "pass3" comment) 1 (date 28 10 2021) "doc" "3rd comment"))
 
 ;-----------------------------------EJEMPLOS PARA LA FUNCIONES ENCRYPT2 Y DECRYPT2 (OPCIONALES)------------
+
+; Cada ejemplo tiene una parte de encriptacion y otra de decryptacion.
 
 (define gDocs13ae (encryptFn "hello"))
 (define gDocs13ad (decryptFn "svool"))

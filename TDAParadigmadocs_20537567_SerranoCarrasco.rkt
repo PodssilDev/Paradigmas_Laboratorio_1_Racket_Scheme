@@ -47,9 +47,11 @@
 ; Descripcion: Comprueba si el formato de paradigmadocs es correcto (name corresponde a string y fecha esta correcta)
 ; Tipo de recursion: No se utiliza recursion
 (define (isParadigmadocs? docs)
-  (if(and(string? (car docs))(date? (car(cdr docs))))
-  #t
-  #f))
+  (if(list? docs)
+     (if(and(string? (car docs))(date? (car(cdr docs))))
+        #t
+        #f)
+     #f))
 
 ;-----------------------------------SELECTORES-----------------------------------------------------------------------
 
@@ -209,8 +211,8 @@
   (if (eq? null listdocumentos)
       pdocs
       (if (eq? (length listdocumentos) 1)
-          (setListaDocumentosPdocs (setDocumentoPdocs pdocs (car listdocumentos)) (cdr listdocumentos))
-          (setListaDocumentosPdocs (setDocumentoAlternPdocs pdocs (car listdocumentos)) (cdr listdocumentos)))))
+          (setListaDocumentosPdocs (setDocumentoPdocs pdocs (getPrimeroListDocumento listdocumentos)) (getSiguientesListDocumento listdocumentos))
+          (setListaDocumentosPdocs (setDocumentoAlternPdocs pdocs (getPrimeroListDocumento listdocumentos)) (getSiguientesListDocumento listdocumentos)))))
 
 ;-----------------------------------OTRAS FUNCIONES-----------------------------------------------------------------
 
@@ -232,22 +234,10 @@
 ; Recorrido: Un numero de ID (Integer)
 ; Dscripcion: Obtiene el ID correspondiente a un documento y se lo agrega a un documento
 ; Tipo de recursion: No se utiliza recursion
-(define(definirID docs)
-  (if(eq? (getDocumentosPdocs docs) null)
+(define(definirID pdocs)
+  (if(eq? (getDocumentosPdocs pdocs) null)
      0
-     (length(getDocumentosPdocs docs))))
-
-; Dominio: Una lista de documentos de tipo list y un ID de tipo integer
-; Recorrido: Un documento de tipo document
-; Descripcion: Encuentra a un documento guardado en Paradigmadocs de acuerdo a su ID. Si no lo encuentra, retorna null
-; Tipo de recursion: Recursion de Cola
-; Justificacion de recursion: Sirve para poder recorrer toda la lista de documentos de paradigmadocs y asi poder encontrar al documento correcto.
-(define (encontrarIDs listdocs ID1)
-  (if (null? listdocs)
-      null
-      (if (verificarIDs (car listdocs) ID1)
-          (car listdocs)
-          (encontrarIDs (cdr listdocs) ID1))))
+     (length(getDocumentosPdocs pdocs))))
 
 ; Dominio: Una lista de usuarios registrados, un nombre de tipo string y un autor de tipo string
 ; Recorrido: Un booleano
@@ -284,9 +274,9 @@
 (define (obtenerDocumentosAutor listfinal listdocument user)
   (if (null? listdocument)
       listfinal
-      (if(eq? (getAutorDocumento (car listdocument)) user)
-         (obtenerDocumentosAutor (cons (car listdocument)listfinal) (cdr listdocument) user)
-         (obtenerDocumentosAutor listfinal (cdr listdocument) user))))
+      (if(eq? (getAutorDocumento (getPrimeroListDocumento listdocument)) user)
+         (obtenerDocumentosAutor (cons (getPrimeroListDocumento listdocument)listfinal) (getSiguientesListDocumento listdocument) user)
+         (obtenerDocumentosAutor listfinal (getSiguientesListDocumento listdocument) user))))
 
 ; Dominio: Una lista (inicialmente vacia), una lista de documento y un user de tipo string
 ; Recorrido: Una lista con documentos, donde se tienen documentos cuyo autor no es el user
@@ -296,9 +286,9 @@
 (define (obtenerDocumentosUser listfinal listdocument user)
   (if (null? listdocument)
       listfinal
-      (if(eq? (getAutorDocumento (car listdocument)) user)
-         (obtenerDocumentosUser listfinal (cdr listdocument) user)
-         (obtenerDocumentosUser (cons (car listdocument)listfinal) (cdr listdocument) user))))
+      (if(eq? (getAutorDocumento (getPrimeroListDocumento listdocument)) user)
+         (obtenerDocumentosUser listfinal (getSiguientesListDocumento listdocument) user)
+         (obtenerDocumentosUser (cons (getPrimeroListDocumento listdocument)listfinal) (getSiguientesListDocumento listdocument) user))))
 
 ; Dominio: Una lista (inicialmente vacia), una lista de documento y un user de tipo string
 ; Recorrido: Una lista con documentos, donde se tienen los documentos donde el user tiene permisos
@@ -308,9 +298,9 @@
 (define (filtrarPorPermisos listfinal listdocument user)
   (if (eq? listdocument null)
       listfinal
-      (if (puedeEscribirLeer (TienePermiso? (getPermisosDocumento (car listdocument)) user))
-          (filtrarPorPermisos (cons (car listdocument) listfinal) (cdr listdocument) user)
-          (filtrarPorPermisos listfinal (cdr listdocument) user))))
+      (if (puedeEscribirLeer (TienePermiso? (getPermisosDocumento (getPrimeroListDocumento listdocument)) user))
+          (filtrarPorPermisos (cons (getPrimeroListDocumento listdocument) listfinal) (getSiguientesListDocumento listdocument) user)
+          (filtrarPorPermisos listfinal (getSiguientesListDocumento listdocument) user))))
 
 ; Dominio: Una lista de usuarios de tipo list y un usuario de tipo user
 ; Recorrido: Un string
@@ -321,7 +311,7 @@
 (define(encontrarDatosUsuarioPdocs listUser nameuser)
   (if(eq?(getUsernameUser(getPrimeroListUser listUser)) nameuser)
      (string-join (list " Username:"(second(cons (date->string (getUsernameUser(getPrimeroListUser listUser))) (remove (last(remove(getUsernameUser(getPrimeroListUser listUser)) (getPrimeroListUser listUser))) (remove(getFechaUser(getPrimeroListUser listUser)) (getPrimeroListUser listUser)))))
-                        "\n" "Fecha de registro:" (first(cons (date->string (getFechaUser(car listUser))) (remove (last(remove(getFechaUser(car listUser)) (car listUser))) (remove(getFechaUser(car listUser)) (getPrimeroListUser listUser))))) "\n" ))
+                        "\n" "Fecha de registro:" (first(cons (date->string (getFechaUser(getPrimeroListUser listUser))) (remove (last(remove(getFechaUser(getPrimeroListUser listUser)) (getPrimeroListUser listUser))) (remove(getFechaUser(getPrimeroListUser listUser)) (getPrimeroListUser listUser))))) "\n" ))
      (encontrarDatosUsuarioPdocs(getSiguientesListUser listUser) nameuser)))
 
 ; Dominio: Una lista (inicialmente vacia), una lista de documentos y un nombre de usuario
@@ -332,23 +322,29 @@
 (define (filtrarPorAccesos listfinal listdocument user)
   (if (eq? listdocument null)
       listfinal
-      (if (not(null?(TienePermiso? (getPermisosDocumento (car listdocument)) user)))
-          (filtrarPorPermisos (cons (car listdocument) listfinal) (cdr listdocument) user)
-          (filtrarPorPermisos listfinal (cdr listdocument) user))))
+      (if (not(null?(TienePermiso? (getPermisosDocumento (getPrimeroListDocumento listdocument)) user)))
+          (filtrarPorPermisos (cons (getPrimeroListDocumento listdocument) listfinal) (getSiguientesListDocumento listdocument) user)
+          (filtrarPorPermisos listfinal (getSiguientesListDocumento listdocument) user))))
 
 ; Dominio: Una lista que contiene sublistas
 ; Recorrido: Una lista, pero cuyo texto ahora esta desencryptado
 ; Descripcion: Funcion que desencrypta un texto del historial de un documento
 ; Tipo de recursion: No se utiliza recursion
+; NOTA: Debido a la naturaleza de map, no puedo obtener decryptFunction directamente desde Paradigmadocs
 (define (desencryptarHistorial listhist)
-  (list (getFechaHistorial listhist) (decryptFunction (getTextoHistorial listhist)) (getIDHistorial listhist)))
+  (if(isHistorial? listhist)
+     (list (getFechaHistorial listhist) (decryptFunction (getTextoHistorial listhist)) (getIDHistorial listhist))
+     null))
 
 ; Dominio: Un documento
 ; Recorrido: Un documento, con todo su texto desencryptado (version activa e historial)
 ; Descripcion: Funcion que desencrypta todo el texto de un documento, este como activo como en el historial
 ; Tipo de recursion: No se utiliza recursion
+; NOTA: Debido a la naturaleza de map, no puedo obtener decryptFunction directamente desde Paradigmadocs
 (define (desencryptarDocs listdoc)
-  (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFunction(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc)))
+  (if(isDocumento? listdoc)
+     (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFunction(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc))
+     null))
 
 ; Dominio: Una lista de lista de sublistas de estilos
 ; Recorrido: Una lista de subestilos
@@ -376,6 +372,7 @@
 
 (define emptyGDocs (paradigmadocs "gDocs" (date 25 10 2021) encryptFunction decryptFunction) )
 (define pertenencia1 (isParadigmadocs? emptyGDocs))
+(define pdocsErroneo1 (paradigmadocs 2 3 1 4))
 
 ; Se utiliza provide para poder utilizar al TDA y sus funciones en otros archivos
 (provide (all-defined-out))
