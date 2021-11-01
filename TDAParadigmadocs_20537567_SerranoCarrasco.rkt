@@ -17,6 +17,7 @@
 ; donde se guarda el username del user activo y una lista de documentos, donde se tiene el autor del documento, la fecha de creacion
 ; de este, el nombre del documento, el contenido (texto) del documento, los permisos adicionales y el historial de versiones
 ; del documento.
+; (string X date X encryptFunction X decryptFunction X list X list X list)
 
 ;-----------------------------------CONSTRUCTORES---------------------------------------------------------------------
 
