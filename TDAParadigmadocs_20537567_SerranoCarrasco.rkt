@@ -347,13 +347,6 @@
      (list (getAutorDocumento listdoc) (getFechaDocumento listdoc)(getNombreDocumento listdoc) (decryptFunction(getContenidoDocumento listdoc)) (getPermisosDocumento listdoc) (map desencryptarHistorial (getHistorialDocumento listdoc)) (getIDDocumento listdoc))
      null))
 
-; Dominio: Una lista de lista de sublistas de estilos
-; Recorrido: Una lista de subestilos
-; Descripcion: Funcion que quita la lista grande inecesaria para quedar solo con la lista de sublista de estilos
-; Tipo de recursion: No se utiliza recursion
-(define (applylist listaestilos)
-  (car listaestilos))
-
 ; Dominio: Un texto de tipo string y una lista de estilos
 ; Recorrido: Un texto de tipo string actualizado
 ; Descripcion: Funcion que aplica los estilos de la lista de estilos al texto
