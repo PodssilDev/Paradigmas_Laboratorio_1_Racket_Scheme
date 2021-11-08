@@ -26,8 +26,10 @@
 ; Recorrido: Un booleano
 ; Descripcion: Verifica si el formato de los elementos de la version de historial es correcto
 (define (isHistorial? historial)
-  (if(and(and(date? (car historial))(string? (car(cdr historial))))(integer? (car(cdr(cdr historial)))))
-     #t
+  (if(list? historial)
+     (if(and(and(date? (car historial))(string? (car(cdr historial))))(integer? (car(cdr(cdr historial)))))
+        #t
+        #f)
      #f))
 
 ;-----------------------------------SELECTORES-----------------------------------------------------------------

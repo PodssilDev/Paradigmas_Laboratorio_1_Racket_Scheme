@@ -45,11 +45,11 @@
 
 ; Dominio: Una plataforma de tipo paradigmadocs
 ; Recorrido: Un booleano
-; Descripcion: Comprueba si el formato de paradigmadocs es correcto (name corresponde a string y fecha esta correcta)
+; Descripcion: Comprueba si el formato de paradigmadocs es correcto (name corresponde a string, fecha esta correcta, y estan Encrypt y Decrypt functions)
 ; Tipo de recursion: No se utiliza recursion
 (define (isParadigmadocs? docs)
   (if(list? docs)
-     (if(and(string? (car docs))(date? (car(cdr docs))))
+     (if(and(and(and(string? (car docs))(date? (car(cdr docs))))(procedure? (car(cdr(cdr docs)))))(procedure? (car(cdr(cdr(cdr docs))))))
         #t
         #f)
      #f))
@@ -77,8 +77,8 @@
   )
 
 ; Dominio: Una plataforma de tipo paradigmadocs
-; Recorrido: Un texto (String) o function
-; Descripcion: Obtiene el texto guardado en la posicion de encryptFn (o la funcion, en caso de que no haya texto)
+; Recorrido: Una function
+; Descripcion: Obtiene la funcion EncryptFunction guardada en Paradigmadocs
 ; Tipo de recursion: No se utiliza recursion
 (define (getEncryptPdocs pdocs)
   (if (isParadigmadocs? pdocs)
@@ -87,8 +87,8 @@
   )
 
 ; Dominio: Una plataforma de tipo paradigmadocs
-; Recorrido: Un texto (String) o function
-; Descripcion: Obtiene el texto guardado en la posicion de decryptFn (o la funcion, en caso de que no haya texto)
+; Recorrido: Una function
+; Descripcion: Obtiene la funcion DecryptFunction guardada en Paradigmadocs
 ; Tipo de recursion: No se utiliza recursion
 (define (getDecryptPdocs pdocs)
   (if (isParadigmadocs? pdocs)

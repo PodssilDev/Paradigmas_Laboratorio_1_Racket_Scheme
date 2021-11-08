@@ -29,9 +29,11 @@
 ; Descripcion: Verifica si el formato del documento es correcto (si el nombre, autor y contenido son strings y la fecha es de tipo fecha y si el ID es un integer)
 ; Tipo de recursion: No se utiliza recursion
 (define(isDocumento? document)
-  (if (and(and(and(and(string? (car document))(date? (car(cdr document))))(string? (car(cdr(cdr document)))))(string? (car(cdr(cdr(cdr document))))))(integer? (car (cdr (cdr (cdr (cdr (cdr (cdr document)))))))))
-      #t
-      #f))
+  (if(list? document)
+     (if (and(and(and(and(string? (car document))(date? (car(cdr document))))(string? (car(cdr(cdr document)))))(string? (car(cdr(cdr(cdr document))))))(integer? (car (cdr (cdr (cdr (cdr (cdr (cdr document)))))))))
+         #t
+         #f)
+     #f))
 
 ;-----------------------------------SELECTORES-----------------------------------------------------------------
 

@@ -28,10 +28,12 @@
 ; Descripcion: Comprueba si el formato del usuario es correcto (Si el username y password son strings)
 ; Tipo de recursion: No se utiliza recursion
 (define (isUser? usuario)
-  (if(and(string? (car(cdr usuario)))(string? (car(cdr(cdr usuario)))))
-     #t
-     #f)
-  )
+  (if(list? usuario)
+     (if(and(string? (car(cdr usuario)))(string? (car(cdr(cdr usuario)))))
+        #t
+        #f)
+     #f
+  ))
 
 ;-----------------------------------SELECTORES---------------------------------------------------------------
 

@@ -33,7 +33,7 @@
 ; Tipo de recursion: Recursion de Cola (Llamado a la funcion recursiva revisarUserActivoPdocs)
 ; Justificacion de recursion: Es necesario para verificar si un usuario ya esta registrado y si el password coincide correctamente
 (define(login paradigmadocs username password operation)
-  (if(or(or(not(isParadigmadocs? paradigmadocs))(not(string? username)))(not(string? password)))
+  (if(or(or(or(not(isParadigmadocs? paradigmadocs))(not(string? username)))(not(string? password)))(not(procedure? operation)))
      paradigmadocs
      (if(revisarUserActivoPdocs paradigmadocs (getUsersPdocs paradigmadocs) username password) ; Llamado a funcion recursiva de TDA Paradigmadocs
         (operation (setUseractivosPdocs paradigmadocs username))

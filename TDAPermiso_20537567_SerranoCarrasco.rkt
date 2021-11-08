@@ -24,8 +24,10 @@
 ; Descripcion: Funcion que verifica si un permiso es de formato correcto
 ; Tipo de recursion: No se utiliza recursion
 (define (isPermiso? Permiso)
-  (if(and(string? (car Permiso)) (char-alphabetic? (car(cdr Permiso))))
-     #t
+  (if(list? Permiso)
+     (if(and(string? (car Permiso)) (char-alphabetic? (car(cdr Permiso))))
+        #t
+        #f)
      #f))
 
 ;-----------------------------------SELECTORES-----------------------------------------------------------------
