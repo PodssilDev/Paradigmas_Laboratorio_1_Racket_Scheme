@@ -1,0 +1,16 @@
+Requerimientos Funcionales	Evaluación
+TDAs                                1
+Register	                    1
+Login	                            1
+Create	                            1
+Share	                            1
+Add	                            1
+RestoreVersion	                    1
+RevokeAllAccesses	            1
+Search	                            1
+Paradigmadocs->String	            1
+Delete	                            1
+SearchAndReplace	            1
+ApplyStyles	                  0.75
+Comment	                            1
+EncryptFn y DecryptFn	            1
