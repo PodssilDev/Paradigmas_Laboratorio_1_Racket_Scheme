@@ -1,8 +1,8 @@
 # Laboratorio 1 Paradigmas de Programación: Programación Funcional
-**Autor:** John Serrano Carrasco
-**Seccion:** 13310-0-A-1
-**Fecha de inicio:** 05 de Octubre de 2021
-**Fecha de Entrega:** 04 de Noviembre de 2021
+* **Autor:** John Serrano Carrasco
+* **Seccion:** 13310-0-A-1
+* **Fecha de inicio:** 05 de Octubre de 2021
+* **Fecha de Entrega:** 04 de Noviembre de 2021
 
 ## Descripción
 Este es el respositorio de mi **laboratorio 1** del curso de Paradigmas de Programación impartido en la Universidad de Santiago. En este laboratorio se ve la programación funcional, a traves del lenguaje de programación Racket o principalmente, Scheme, donde se busca crear una simulación a algo similar a una plataforma estilo Google Docs.
