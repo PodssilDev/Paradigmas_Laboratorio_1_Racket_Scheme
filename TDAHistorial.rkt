@@ -1,6 +1,6 @@
 #lang racket
 ; Se necesita del TDA Fecha para la construccion del TDA Historial
-(require "TDAFecha_20537567_SerranoCarrasco.rkt")
+(require "TDAFecha.rkt")
 
 ; NOTA: No fue necesario construir modificadores para este TDA.
 ;-----------------------------------TDA HISTORIAL---------------------------------------------------------------

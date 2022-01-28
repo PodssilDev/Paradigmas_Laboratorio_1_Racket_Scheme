@@ -1,13 +1,13 @@
 #lang racket
 ; Se requiere el uso del TDA Fecha, TDA Access, TDA Paradigmadocs, TDA User y TDA Documento para la construcción de las funciones a continuación
 
-(require "TDAFecha_20537567_SerranoCarrasco.rkt")
-(require "TDAAccess_20537567_SerranoCarrasco.rkt")
-(require "TDAParadigmadocs_20537567_SerranoCarrasco.rkt")
-(require "TDAUser_20537567_SerranoCarrasco.rkt")
-(require "TDAHistorial_20537567_SerranoCarrasco.rkt") ; Se utiliza en TDADocumento
-(require "TDAPermiso_20537567_SerranoCarrasco.rkt")
-(require "TDADocumento_20537567_SerranoCarrasco.rkt")
+(require "TDAFecha.rkt")
+(require "TDAAccess.rkt")
+(require "TDAParadigmadocs.rkt")
+(require "TDAUser.rkt")
+(require "TDAHistorial.rkt") ; Se utiliza en TDADocumento
+(require "TDAPermiso.rkt")
+(require "TDADocumento.rkt")
 
 ;-----------------------------------FUNCION REGISTER-----------------------------------------------------------------
 

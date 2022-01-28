@@ -1,11 +1,11 @@
 #lang racket
 ; Se requiere el uso de los TDA Fecha, TDA Access TDA User, TDA Historial, TDA Permiso y TDA Documento para elaborar la construccion del TDA ParadigmaDocs
-(require "TDAFecha_20537567_SerranoCarrasco.rkt")
-(require "TDAUser_20537567_SerranoCarrasco.rkt")
-(require "TDAHistorial_20537567_SerranoCarrasco.rkt")
-(require "TDAPermiso_20537567_SerranoCarrasco.rkt")
-(require "TDADocumento_20537567_SerranoCarrasco.rkt")
-(require "TDAAccess_20537567_SerranoCarrasco.rkt")
+(require "TDAFecha.rkt")
+(require "TDAUser.rkt")
+(require "TDAHistorial.rkt")
+(require "TDAPermiso.rkt")
+(require "TDADocumento.rkt")
+(require "TDAAccess.rkt")
 
 ;-----------------------------------TDA PARADIGMADOCS-----------------------------------------------------------------
 

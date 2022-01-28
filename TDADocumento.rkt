@@ -1,8 +1,8 @@
 #lang racket
 ; Se necesita de los TDA Fecha, TDA Historial y TDA Permiso para la construccion del TDA Documento
-(require "TDAFecha_20537567_SerranoCarrasco.rkt")
-(require "TDAHistorial_20537567_SerranoCarrasco.rkt")
-(require "TDAPermiso_20537567_SerranoCarrasco.rkt")
+(require "TDAFecha.rkt")
+(require "TDAHistorial.rkt")
+(require "TDAPermiso.rkt")
 
 ;-----------------------------------TDA DOCUMENTO---------------------------------------------------------------
 

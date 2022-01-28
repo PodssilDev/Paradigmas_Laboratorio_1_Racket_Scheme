@@ -1,6 +1,6 @@
 #lang racket
 ; Se requiere el uso del TDA Fecha para elaborar la construcción del TDA User
-(require "TDAFecha_20537567_SerranoCarrasco.rkt")
+(require "TDAFecha.rkt")
 
 ; NOTA: No fue necesario crear modificadores para este TDA.
 ;-----------------------------------TDA USER-----------------------------------------------------------------
